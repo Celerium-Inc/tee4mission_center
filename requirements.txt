@@ -1,0 +1,5 @@
+absl-py==0.13.0
+PyJWT==2.1.0
+requests==2.26.0
+var_dump==1.2
+
