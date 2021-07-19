@@ -20,7 +20,10 @@ def main(argv):
         print('non-flag arguments:', argv)
         print(f'Hello, {FLAGS.username}!')
     ms_api = MissionCenter(FLAGS.host, FLAGS.username, FLAGS.api_key)
-    response = ms_api.get_current_user()
+    # response = ms_api.get_current_user()
+    # response = ms_api.get_group_threads()
+    response = ms_api.get_threat_extraction()
+
 
 if __name__ == '__main__':
     app.run(main)

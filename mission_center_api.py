@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import jwt  # in PyJWT (not jwt on PyPI)
 import requests
@@ -45,6 +46,7 @@ class MissionCenter():
             return response
 
     def get_current_user(self):
+        """Set group_id."""
         result = self.do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
         print(result)
         if result:
@@ -52,7 +54,51 @@ class MissionCenter():
                 var_dump(result)
                 group_id = result['compartments'][0]['groupId']
                 print(f'groupId: {group_id}')
+                self.group_id = group_id
             except KeyError as e:
                 print('groupId not found in user data.')
         else:
             print('No result received from the API')
+
+    def get_group_threads(self):
+        if getattr(self, 'group_id', None) is None:
+            self.get_current_user()
+        self.group_id = 39155
+        # result = self.do_json_get_request(f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={self.group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1')
+        result = self.do_json_get_request(f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId=39155&subscribed=false&includeAnonymous=false&start=-1&end=-1')
+        print(result)
+        if result:
+            try:
+                var_dump(result)
+                self.thread_ids = [_['threadId'] for _ in result]
+            except KeyError as e:
+                print('... not found in user data.')
+        else:
+            print('No result received from the API')
+
+    def get_threat_extraction(self):
+        if getattr(self, 'thread_ids', None) is None:
+            self.get_group_threads()
+
+        self.group_id = 39155
+        self.category_id = 41863
+        for thread_id in self.thread_ids:
+            result = self.do_json_get_request(
+                f'{self.host}/api/jsonws/security.mbthread/get-thread?groupId={self.group_id}&'
+                f'categoryId={self.category_id}&threadId={thread_id}&includePosts=false&includeTE=true&teType=stix&postsDesc=true&xssScrape=false'
+            )
+            if result:
+                try:
+                    # var_dump(result)
+                    threat_extraction_string = result.get('threatExtraction', '')
+                    if threat_extraction_string:
+                        filename = f'./data/{result["threadId"]}.xml'
+                        if not os.path.exists:
+                            with open(filename, 'w') as fh:
+                                fh.write(threat_extraction_string)
+                    else:
+                        print(f'No threat extraction in thread_id: {thread_id}')
+                except KeyError as e:
+                    print('... not found in user data.')
+            else:
+                print(f'No result received from the API in get_threat_extraction for thread_id: {thread_id}')
