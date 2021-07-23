@@ -9,19 +9,24 @@
 flags:
 
 main.py:
-  --api_key: API Token
-    (default: '')
-  --[no]debug: Produces debugging output.
+  --[no]debug: Produces debugging output
     (default: 'false')
-  --host: Mission Center Host
+  --misp_api_key: MISP API Token
+    (default: '')
+  --misp_host: MISP Host
+    (default: '')
+  --[no]misp_ssl_verify: SSL Verify
+    (default: 'true')
+  --ms_api_key: API Token
+    (default: '')
+  --ms_host: Mission Center Host
     (default: 'https://missioncenter.celeriumd.net')
+  --ms_username: Username
+    (default: '')
   --thread_id: Thread ID
     (default: '16121783')
-  --username: Username
-    (default: '')
 
 Try --helpfull to get a list of all flags.
-(mission_center2splunk)  ✘ ddye@cornix  ~/Projects/mission_center2splunk   main 
 ```
 
 # Example
