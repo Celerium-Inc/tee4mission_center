@@ -96,6 +96,8 @@ class MissionCenter():
                         if not os.path.exists:
                             with open(filename, 'w') as fh:
                                 fh.write(threat_extraction_string)
+                        else:
+                            print('XML file exists. Skipping.')
                     else:
                         print(f'No threat extraction in thread_id: {thread_id}')
                 except KeyError as e:

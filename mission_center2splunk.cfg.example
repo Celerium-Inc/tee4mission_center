@@ -1,0 +1,9 @@
+--ms_host=https://missioncenter.celeriumd.net
+--ms_username=auser
+--ms_api_key=Aa1...zZ9
+
+--misp_host=https://example.com:8443/
+--misp_api_key=Aa1...zZ9
+--misp_ssl_verify=True
+
+--debug=False
