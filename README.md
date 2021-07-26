@@ -1,4 +1,16 @@
 
+# Mission Center Integrations Script
+
+Mission Center has STIX XML files associated with threads.  This script enumerates all of the threads accessible to the user (who’s API Keys are used) and then it downloads the XML for each thread to a local directory.
+
+## MISP
+
+After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the MISP Instance.
+
+## Splunk (Future Work)
+
+After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+
 # Requirements
 
 ## Install requirements in a virtual environment
