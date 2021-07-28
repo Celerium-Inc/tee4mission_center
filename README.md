@@ -53,13 +53,13 @@ main.py:
     (default: '')
   --[no]misp_ssl_verify: SSL Verify
     (default: 'true')
-  --ms_api_key: API Token
+  --mc_api_key: API Token
     (default: '')
-  --ms_host: Mission Center Host
+  --mc_host: Mission Center Host
     (default: 'https://missioncenter.celeriumd.net')
-  --ms_username: Username
+  --mc_username: Username
     (default: '')
-  --thread_id: Thread ID
+  --mc_thread_id: Thread ID
     (default: '16121783')
 
 Try --helpfull to get a list of all flags.
@@ -106,22 +106,6 @@ https://missioncenter.celeriumd.net ddye <api key redacted>
             ['description'] => str(0) ""
             ['friendlyURL'] => str(20) "/threat-intel-center"
             ['groupId'] => int(39155)
-            ['parentGroupId'] => int(0)
-            ['entityCacheEnabled'] => bool(True)
-            ['finderCacheEnabled'] => bool(True)
-        [3] => dict(7)
-            ['name'] => str(157) "<?xml version='1.0' encoding='UTF-8'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Billington International</Name></root>"
-            ['description'] => str(0) ""
-            ['friendlyURL'] => str(10) "/auto-isac"
-            ['groupId'] => int(15049013)
-            ['parentGroupId'] => int(0)
-            ['entityCacheEnabled'] => bool(True)
-            ['finderCacheEnabled'] => bool(True)
-        [4] => dict(7)
-            ['name'] => str(152) "<?xml version='1.0' encoding='UTF-8'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Day &amp; Zimmerman</Name></root>"
-            ['description'] => str(0) ""
-            ['friendlyURL'] => str(14) "/day-zimmerman"
-            ['groupId'] => int(15797460)
             ['parentGroupId'] => int(0)
             ['entityCacheEnabled'] => bool(True)
             ['finderCacheEnabled'] => bool(True)
