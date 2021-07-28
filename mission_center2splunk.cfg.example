@@ -6,4 +6,9 @@
 --misp_api_key=Aa1...zZ9
 --misp_ssl_verify=True
 
+--splunk_username=auser
+--splunk_password='your-password'
+--splunk_host=https://localhost:8089/
+--splunk_ssl_verify=False
+
 --debug=False
