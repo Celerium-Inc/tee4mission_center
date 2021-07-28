@@ -9,15 +9,14 @@ from var_dump import var_dump
 
 
 class MissionCenter():
-    def __init__(self, host, username, token, debug=False):
-        self.host = host
-        self.username = username
-        self.token = token
-        if debug:
-            print(self.host, self.username, self.token)
+    def __init__(self, FLAGS):
+        self.FLAGS = FLAGS
+        self.host = self.FLAGS.mc_host
+        self.username = self.FLAGS.mc_username
+        self.token = self.FLAGS.mc_api_key
+        self.group_ids = []
+        self.thread_ids = {}  # keys are group_id, values are list of thread_ids
         self.refresh_token()
-        if debug:
-            print(self.jwt_token)
         # Create the headers to send in the API request
         self.headers = {
             'Authorization': 'Bearer ' + str(self.jwt_token)
@@ -39,89 +38,67 @@ class MissionCenter():
             url,
             proxies={},
             headers=self.headers,
-            # verify=True
+            verify=self.FLAGS.mc_ssl_verify
         )
 
     def get_current_user(self):
         """Set group_id."""
         result = self.do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
-        print(result)
-        if result:
+        if self.FLAGS.debug:
+            print(result)
+        if result.status_code == 200:
             try:
-                var_dump(result)
-                #group_id = result['compartments'][0]['groupId']
-                #print(f'groupId: {group_id}')
-                self.group_ids = [ _['groupId'] for _ in result.json()['compartments'] ]
+                if self.FLAGS.debug:
+                    var_dump(result)
+
+                # One and only one groupId for each Compartment
+                self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
             except KeyError as e:
-                print('groupId not found in user data.')
+                print(f'groupId not found in user data: {e}.')
         else:
-            print('No result received from the API')
+            print(f'Bad status code ({result.status_code}) result received from the API')
 
     def get_group_threads(self):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
             self.get_current_user()
-        #self.group_id = 39155
 
         for group_id in self.group_ids:
+            if self.FLAGS.debug:
+                print(f'working on group_id: {group_id}')
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
             result = self.do_json_get_request(url)
-
-            print(result)
-            if result:
-
-                try:
-                    var_dump(result.json())
-                    self.thread_ids = [_['threadId'] for _ in result.json()]
-                except KeyError as e:
-                    print('... not found in user data.')
+            if result.status_code == 200:
+                # Future Work: thread_ids uniquely identify, so the thread_id is not needed
+                self.thread_ids[group_id] = [_['threadId'] for _ in result.json()]
             else:
-                print('No result or bad status code received from the API.')
+                print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
 
     def get_threat_extraction(self):
-        if getattr(self, 'thread_ids', None) is None:
+
+        if not getattr(self, 'thread_ids', None):
             self.get_group_threads()
 
-        #self.group_id = 39155
-        #self.category_id = 41863
-
-        for thread_id in self.thread_ids:
-            stix_url = f'{self.host}/api/jsonws/security.mbthread/get-thread?groupId={self.group_id}&categoryId={self.category_id}&threadId={thread_id}&includePosts=false&includeTE=true&teType=stix&postsDesc=true&xssScrape=false'
-            result = self.do_json_get_request(stix_url)
-            if result.status_code == 200:
-                try:
-                    # var_dump(result)
-                    threat_extraction_string = result.json().get('threatExtraction', '')
-                    if threat_extraction_string:
-                        filename = f'./data/{result["threadId"]}.xml'
-                        if not os.path.exists(filename):
-                            with open(filename, 'w') as fh:
-                                fh.write(threat_extraction_string)
-                        else:
-                            print('XML file exists. Skipping.')
+        for group_id in self.thread_ids:
+            for thread_id in self.thread_ids[group_id]:
+                for te_type in ('json', 'stix'):
+                    if self.FLAGS.debug:
+                        print(f'Working on {group_id},{thread_id},{te_type}')
+                    url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
+                    result = self.do_json_get_request(url)
+                    if result.status_code == 200:
+                        try:
+                            # var_dump(result)
+                            threat_extraction_string = result.json().get('threatExtraction', '')
+                            if threat_extraction_string:
+                                filename = f'./data/{thread_id}.{te_type}'
+                                if not os.path.exists(filename):
+                                    with open(filename, 'w') as fh:
+                                        fh.write(threat_extraction_string)
+                                else:
+                                    print('XML file exists. Skipping.')
+                            else:
+                                print(f'No threat extraction in thread_id: {thread_id}')
+                        except KeyError as e:
+                            print('... not found in user data.')
                     else:
-                        print(f'No threat extraction in thread_id: {thread_id}')
-                except KeyError as e:
-                    print('... not found in user data.')
-            else:
-                print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
-
-
-            json_url = f'{self.host}/api/jsonws/security.mbthread/get-thread?groupId={self.group_id}&categoryId={self.category_id}&threadId={thread_id}&includePosts=false&includeTE=true&teType=json&postsDesc=true&xssScrape=false'
-            result = self.do_json_get_request(json_url)
-            if result.status_code == 200:
-                try:
-                    # var_dump(result)
-                    threat_extraction_string = result.json().get('threatExtraction', '')
-                    if threat_extraction_string:
-                        filename = f'./data/{result["threadId"]}.json'
-                        if not os.path.exists(filename):
-                            with open(filename, 'w') as fh:
-                                fh.write(threat_extraction_string)
-                        else:
-                            print('JSON file exists. Skipping.')
-                    else:
-                        print(f'No threat extraction in thread_id: {thread_id}')
-                except KeyError as e:
-                    print('... not found in user data.')
-            else:
-                print(f'Bad status code ({result.status_code}) received from the API in get_threat_extraction for thread_id: {thread_id}')
+                        print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')

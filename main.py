@@ -16,9 +16,9 @@ FLAGS = flags.FLAGS
 # careful to pick names that are unlikely to be used by other libraries.
 # If there is a conflict, we'll get an error at import time.
 flags.DEFINE_string('mc_host', 'https://missioncenter.celeriumd.net', 'Mission Center Host')
-flags.DEFINE_string('mc_username', '', 'Username')
-flags.DEFINE_string('mc_api_key', '', 'API Token')
-flags.DEFINE_string('mc_thread_id', '16121783', 'Thread ID')
+flags.DEFINE_string('mc_username', '', 'Mission Center Username')
+flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
+flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
 
 flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
 flags.DEFINE_string('misp_host', '', 'MISP Host')
@@ -37,7 +37,7 @@ def main(argv):
         print('non-flag arguments:', argv)
         print(f'Hello, {FLAGS.mc_username}!')
 
-    mc_api = MissionCenter(FLAGS.mc_host, FLAGS.mc_username, FLAGS.mc_api_key)
+    mc_api = MissionCenter(FLAGS)
     mc_api.get_threat_extraction()
 
     for path in glob.glob('./data/*.json'):
@@ -50,7 +50,7 @@ def main(argv):
             splunk_upload_stix(data=data, FLAGS=FLAGS)
 
     misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
-    for path in glob.glob('./data/*.xml'):
+    for path in glob.glob('./data/*.stix'):
         misp_upload_stix(misp, path=path, version=1)
 
 
