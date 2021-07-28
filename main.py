@@ -4,7 +4,6 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from absl import app, flags
-import requests
 from pymisp import PyMISP
 
 from mission_center_api import MissionCenter
@@ -39,13 +38,8 @@ def main(argv):
         print(f'Hello, {FLAGS.mc_username}!')
 
     mc_api = MissionCenter(FLAGS.mc_host, FLAGS.mc_username, FLAGS.mc_api_key)
-    # response = mc_api.get_current_user()
-    # response = mc_api.get_group_threads()
-    response = mc_api.get_threat_extraction()
-    if FLAGS.debug:
-        print(response)
+    mc_api.get_threat_extraction()
 
-    # splunk_upload_stix(data={'bar': 'foo'}, FLAGS=FLAGS)
     for path in glob.glob('./data/*.json'):
         with open(path) as fh:
             try:
@@ -53,15 +47,11 @@ def main(argv):
             except json.decoder.JSONDecodeError:
                 print(f'Invalid JSON in the file: {path}')
                 continue
-            result = splunk_upload_stix(data=data, FLAGS=FLAGS)
-            if FLAGS.debug:
-                print(result)
+            splunk_upload_stix(data=data, FLAGS=FLAGS)
 
     misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
     for path in glob.glob('./data/*.xml'):
-        result = misp_upload_stix(misp, path=path, version=1)
-        if FLAGS.debug:
-            print(result)
+        misp_upload_stix(misp, path=path, version=1)
 
 
 if __name__ == '__main__':
