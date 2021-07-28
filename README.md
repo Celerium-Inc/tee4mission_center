@@ -7,9 +7,14 @@ Mission Center has STIX XML files associated with threads.  This script enumerat
 
 After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the MISP Instance.
 
+## Splunk ES (Future Work)
+
+After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+
 ## Splunk (Future Work)
 
-After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+
 
 # Requirements
 
