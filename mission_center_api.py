@@ -44,17 +44,11 @@ class MissionCenter():
     def get_current_user(self):
         """Set group_id."""
         result = self.do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
-        if self.FLAGS.debug:
-            print(result)
         if result.status_code == 200:
-            try:
-                if self.FLAGS.debug:
-                    var_dump(result)
-
-                # One and only one groupId for each Compartment
-                self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
-            except KeyError as e:
-                print(f'groupId not found in user data: {e}.')
+            if self.FLAGS.debug:
+                var_dump(result)
+            # One and only one groupId for each Compartment
+            self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
         else:
             print(f'Bad status code ({result.status_code}) result received from the API')
 
@@ -86,19 +80,17 @@ class MissionCenter():
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
                     result = self.do_json_get_request(url)
                     if result.status_code == 200:
-                        try:
-                            # var_dump(result)
-                            threat_extraction_string = result.json().get('threatExtraction', '')
-                            if threat_extraction_string:
-                                filename = f'./data/{thread_id}.{te_type}'
-                                if not os.path.exists(filename):
-                                    with open(filename, 'w') as fh:
-                                        fh.write(threat_extraction_string)
-                                else:
-                                    print('XML file exists. Skipping.')
+                        # var_dump(result)
+                        threat_extraction_string = result.json().get('threatExtraction', '')
+                        if threat_extraction_string:
+                            filename = f'./data/{thread_id}.{te_type}'
+                            if not os.path.exists(filename):
+                                with open(filename, 'w') as fh:
+                                    fh.write(threat_extraction_string)
                             else:
-                                print(f'No threat extraction in thread_id: {thread_id}')
-                        except KeyError as e:
-                            print('... not found in user data.')
+                                print(f'{filename} exists. Skipping.')
+                        else:
+                            print(f'No threat extraction in thread_id: {thread_id}')
                     else:
                         print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
+
