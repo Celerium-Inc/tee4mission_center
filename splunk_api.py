@@ -19,5 +19,5 @@ def splunk_upload_stix(data, FLAGS):
     )
     # expect http 201
     new_keys = post_response.json()
-    import pdb; pdb.set_trace()
+
 
