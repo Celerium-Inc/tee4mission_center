@@ -1,19 +1,19 @@
 
 # Mission Center Integrations Script
 
-Mission Center has STIX XML files associated with threads.  This script enumerates all of the threads accessible to the user (who’s API Keys are used) and then it downloads the XML for each thread to a local directory.
+Mission Center has STIX XML files associated with threads.  This script enumerates all of the threads accessible to the user (who’s API Keys are used) and then downloads the XML (and JSON version) for each thread to a local directory (./staging).
 
 ## MISP
 
 After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the MISP Instance.
 
-## Splunk ES (Future Work)
+## Splunk Enterprise Security (Future Work)
 
-After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API.
 
-## Splunk (Future Work)
+## Splunk Splunk Security Essentials
 
-After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API endpoint.
+After downloading the JSON from Mission Center, when the Splunk config settings are present, the script submits the JSON to the Splunk Instance’s Splunk_Security_Essentials/storage/collections/data/custom_content API.
 
 
 # Requirements

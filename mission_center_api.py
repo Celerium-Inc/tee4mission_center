@@ -77,17 +77,17 @@ class MissionCenter():
                 for te_type in ('json', 'stix'):
                     if self.FLAGS.debug:
                         print(f'Working on {group_id},{thread_id},{te_type}')
-                    filename = f'./data/{thread_id}.{te_type}'
-                    if os.path.exists(filename):
-                        print(f'{filename} exists. Skipping.')
+                    staging_filename = f'./staging/{thread_id}.{te_type}'
+                    complete_filename = f'./complete/{thread_id}.{te_type}'
+                    if os.path.exists(complete_filename):
+                        print(f'{complete_filename} exists. Skipping.')
                         continue
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
                     result = self.do_json_get_request(url)
                     if result.status_code == 200:
-                        # var_dump(result)
                         threat_extraction_string = result.json().get('threatExtraction', '')
                         if threat_extraction_string:
-                            with open(filename, 'w') as fh:
+                            with open(staging_filename, 'w') as fh:
                                 fh.write(threat_extraction_string)
                         else:
                             print(f'No threat extraction in thread_id: {thread_id}')

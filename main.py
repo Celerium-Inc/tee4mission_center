@@ -1,5 +1,6 @@
 import glob
 import json
+import os
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -41,7 +42,7 @@ def main(argv):
     mc_api.get_threat_extraction()
 
     if FLAGS.splunk_host:
-        for path in glob.glob('./data/*.json'):
+        for path in glob.glob('./staging/*.json'):
             with open(path) as fh:
                 try:
                     data = json.load(fh)
@@ -49,11 +50,13 @@ def main(argv):
                     print(f'Invalid JSON in the file: {path}')
                     continue
                 splunk_upload_stix(data=data, FLAGS=FLAGS)
+                os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
 
     if FLAGS.misp_host:
         misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
-        for path in glob.glob('./data/*.stix'):
+        for path in glob.glob('./staging/*.stix'):
             misp_upload_stix(misp, path=path, version=1)
+            os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
 
 
 if __name__ == '__main__':
