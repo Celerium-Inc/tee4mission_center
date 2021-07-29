@@ -74,8 +74,12 @@ class MissionCenter():
 
         for group_id in self.thread_ids:
             for thread_id in self.thread_ids[group_id]:
+                missing_threat_extraction = False
                 for te_type in ('json', 'stix'):
-                    # ToDo: skip stix call if json returns nothing
+                    if missing_threat_extraction:
+                        if self.FLAGS.debug:
+                            print(f'Skipping the {te_type} download b/c the previous type failed')
+                        continue
                     if self.FLAGS.debug:
                         print(f'Working on {group_id},{thread_id},{te_type}')
                     staging_filename = f'./staging/{thread_id}.{te_type}'
@@ -92,6 +96,7 @@ class MissionCenter():
                                 fh.write(threat_extraction_string)
                         else:
                             print(f'No threat extraction in thread_id: {thread_id}')
+                            missing_threat_extraction = True
                     else:
                         print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
 
