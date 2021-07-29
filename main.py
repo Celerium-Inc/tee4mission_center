@@ -2,7 +2,6 @@ import glob
 import json
 import os
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from absl import app, flags
 from pymisp import PyMISP
@@ -34,9 +33,10 @@ flags.DEFINE_boolean('debug', False, 'Produces debugging output')
 
 
 def main(argv):
+    if False in (FLAGS.splunk_ssl_verify, FLAGS.misp_ssl_verify, FLAGS.mc_ssl_verify):
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     if FLAGS.debug:
         print('non-flag arguments:', argv)
-        print(f'Hello, {FLAGS.mc_username}!')
 
     mc_api = MissionCenter(FLAGS)
     mc_api.get_threat_extraction()
