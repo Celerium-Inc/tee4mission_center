@@ -40,18 +40,20 @@ def main(argv):
     mc_api = MissionCenter(FLAGS)
     mc_api.get_threat_extraction()
 
-    for path in glob.glob('./data/*.json'):
-        with open(path) as fh:
-            try:
-                data = json.load(fh)
-            except json.decoder.JSONDecodeError:
-                print(f'Invalid JSON in the file: {path}')
-                continue
-            splunk_upload_stix(data=data, FLAGS=FLAGS)
+    if FLAGS.splunk_host:
+        for path in glob.glob('./data/*.json'):
+            with open(path) as fh:
+                try:
+                    data = json.load(fh)
+                except json.decoder.JSONDecodeError:
+                    print(f'Invalid JSON in the file: {path}')
+                    continue
+                splunk_upload_stix(data=data, FLAGS=FLAGS)
 
-    misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
-    for path in glob.glob('./data/*.stix'):
-        misp_upload_stix(misp, path=path, version=1)
+    if FLAGS.misp_host:
+        misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
+        for path in glob.glob('./data/*.stix'):
+            misp_upload_stix(misp, path=path, version=1)
 
 
 if __name__ == '__main__':
