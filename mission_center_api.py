@@ -75,6 +75,7 @@ class MissionCenter():
         for group_id in self.thread_ids:
             for thread_id in self.thread_ids[group_id]:
                 for te_type in ('json', 'stix'):
+                    # ToDo: skip stix call if json returns nothing
                     if self.FLAGS.debug:
                         print(f'Working on {group_id},{thread_id},{te_type}')
                     staging_filename = f'./staging/{thread_id}.{te_type}'
