@@ -25,7 +25,7 @@ $ source ./venv/bin/activate
 (venv) $ pip install -r requirements.txt
 ```
 
-## Verify Requirements are Met
+## Verify tequirements are met
 ```
 (venv) $ pip show pymisp
 Name: pymisp
@@ -52,23 +52,32 @@ flags:
 main.py:
   --[no]debug: Produces debugging output
     (default: 'false')
+  --mc_api_key: Mission Center API Token
+    (default: '')
+  --mc_host: Mission Center Host
+    (default: 'https://missioncenter.celeriumd.net')
+  --[no]mc_ssl_verify: Mission Center SSL Verify
+    (default: 'true')
+  --mc_username: Mission Center Username
+    (default: '')
   --misp_api_key: MISP API Token
     (default: '')
   --misp_host: MISP Host
     (default: '')
-  --[no]misp_ssl_verify: SSL Verify
+  --[no]misp_ssl_verify: MISP SSL Verify
     (default: 'true')
-  --mc_api_key: API Token
+  --splunk_host: Splunk Host
     (default: '')
-  --mc_host: Mission Center Host
-    (default: 'https://missioncenter.celeriumd.net')
-  --mc_username: Username
+  --splunk_password: Splunk Password
     (default: '')
-  --mc_thread_id: Thread ID
-    (default: '16121783')
+  --[no]splunk_ssl_verify: Splunk SSL Verify
+    (default: 'true')
+  --splunk_username: Splunk Username
+    (default: '')
 
 Try --helpfull to get a list of all flags.
 ```
+
 
 # Example
 ```
