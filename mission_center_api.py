@@ -1,7 +1,6 @@
 import datetime
 import os
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 import jwt  # in PyJWT (not jwt on PyPI)
 import requests
@@ -14,13 +13,19 @@ class MissionCenter():
         self.host = self.FLAGS.mc_host
         self.username = self.FLAGS.mc_username
         self.token = self.FLAGS.mc_api_key
+
+        if self.FLAGS.mc_ssl_verify is False:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        # data structures for tracking Mission Center Thread metadata; set by get_* methods
         self.group_ids = []
         self.thread_ids = {}  # keys are group_id, values are list of thread_ids
+
+        # two below are set by refresh_token()
+        self.jwt_token = None
+        self.headers = None
         self.refresh_token()
-        # Create the headers to send in the API request
-        self.headers = {
-            'Authorization': 'Bearer ' + str(self.jwt_token)
-        }
+
 
     def refresh_token(self):
         # Create the payload for JWT authorization
@@ -31,8 +36,12 @@ class MissionCenter():
         }
         # Pass in your payload, shared secret, and encryption type to create your JWT
         self.jwt_token = jwt.encode(payload, self.token, 'HS256')
+        # Create the headers to send in the API request
+        self.headers = {
+            'Authorization': 'Bearer ' + str(self.jwt_token)
+        }
 
-    def do_json_get_request(self, url):
+    def _do_json_get_request(self, url):
         # Request the URL
         return requests.get(
             url,
@@ -43,7 +52,7 @@ class MissionCenter():
 
     def get_current_user(self):
         """Set group_id."""
-        result = self.do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
+        result = self._do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
         if result.status_code == 200:
             if self.FLAGS.debug:
                 var_dump(result)
@@ -60,7 +69,7 @@ class MissionCenter():
             if self.FLAGS.debug:
                 print(f'working on group_id: {group_id}')
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
-            result = self.do_json_get_request(url)
+            result = self._do_json_get_request(url)
             if result.status_code == 200:
                 # Future Work: thread_ids uniquely identify, so the thread_id is not needed
                 self.thread_ids[group_id] = [_['threadId'] for _ in result.json()]
@@ -88,7 +97,7 @@ class MissionCenter():
                         print(f'{complete_filename} exists. Skipping.')
                         continue
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
-                    result = self.do_json_get_request(url)
+                    result = self._do_json_get_request(url)
                     if result.status_code == 200:
                         threat_extraction_string = result.json().get('threatExtraction', '')
                         if threat_extraction_string:
@@ -99,4 +108,3 @@ class MissionCenter():
                             missing_threat_extraction = True
                     else:
                         print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
-
