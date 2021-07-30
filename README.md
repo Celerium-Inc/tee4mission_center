@@ -41,6 +41,17 @@ Required-by:
 ```
 
 
+# Configuration
+
+This utility uses Abseil's flags (aka gflags):
+https://abseil.io/docs/python/guides/flags
+
+Although you can specify the flags from the command line, it is easiest to put them 
+into a file and then specify that file with `--flagfile` (see Example below).
+
+An example config file is provided: `mission_center2splunk.cfg.example`
+
+
 # Usage
 
 ```
