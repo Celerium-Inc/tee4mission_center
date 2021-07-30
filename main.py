@@ -19,14 +19,15 @@ flags.DEFINE_string('mc_host', 'https://missioncenter.celeriumd.net', 'Mission C
 flags.DEFINE_string('mc_username', '', 'Mission Center Username')
 flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
 flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
+flags.DEFINE_list('mc_include_categories', None, 'Mission Center API Token')
 
-flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
 flags.DEFINE_string('misp_host', '', 'MISP Host')
+flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
 flags.DEFINE_boolean('misp_ssl_verify', True, 'MISP SSL Verify')
 
+flags.DEFINE_string('splunk_host', '', 'Splunk Host')
 flags.DEFINE_string('splunk_username', '', 'Splunk Username')
 flags.DEFINE_string('splunk_password', '', 'Splunk Password')
-flags.DEFINE_string('splunk_host', '', 'Splunk Host')
 flags.DEFINE_boolean('splunk_ssl_verify', True, 'Splunk SSL Verify')
 
 flags.DEFINE_boolean('debug', False, 'Produces debugging output')

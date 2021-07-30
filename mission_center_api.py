@@ -67,11 +67,17 @@ class MissionCenter():
 
         for group_id in self.group_ids:
             if self.FLAGS.debug:
-                print(f'working on group_id: {group_id}')
+                print(f'Working on group_id: {group_id}...')
+
+            if self.FLAGS.mc_include_categories:
+                if group_id not in [int(parts.split(';')[0]) for parts in self.FLAGS.mc_include_categories]:
+                    if self.FLAGS.debug:
+                        print(f'Skipping groupId: {group_id} due to configuration flags.')
+
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
             result = self._do_json_get_request(url)
             if result.status_code == 200:
-                # Future Work: thread_ids uniquely identify, so the thread_id is not needed
+                # Future Work: thread_ids uniquely identify, so the group_id/category_id is not needed
                 self.thread_ids[group_id] = [_['threadId'] for _ in result.json()]
             else:
                 print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
@@ -108,3 +114,4 @@ class MissionCenter():
                             missing_threat_extraction = True
                     else:
                         print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
+                        missing_threat_extraction = True
