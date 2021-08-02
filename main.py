@@ -19,9 +19,11 @@ flags.DEFINE_string('mc_host', 'https://missioncenter.celeriumd.net', 'Mission C
 flags.DEFINE_string('mc_username', '', 'Mission Center Username')
 flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
 flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
-flags.DEFINE_list('mc_include_categories', None, 'Mission Center API Token')
+flags.DEFINE_list('mc_include_categories', None, 'Specify list of `groupId;categoryId,...` to upload')
+flags.DEFINE_list('mc_include_threads', None, 'Specify list of `threadId,...` to upload')
 
 flags.DEFINE_boolean('mc_get_categories', False, 'Get Mission Center Categories and exit')
+
 
 flags.DEFINE_string('misp_host', '', 'MISP Host')
 flags.DEFINE_string('misp_api_key', '', 'MISP API Token')

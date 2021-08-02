@@ -53,7 +53,7 @@ class MissionCenter():
         )
 
     def get_current_user(self):
-        """Set group_id."""
+        """Set group_id list to identify each of the Compartments."""
         result = self._do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
         if result.status_code == 200:
             if self.FLAGS.debug:
@@ -76,13 +76,17 @@ class MissionCenter():
                 headers=self.headers,
                 verify=self.FLAGS.mc_ssl_verify
             )
-            print(response)
             category_records.extend(response.json())
 
         categories_df = pd.DataFrame.from_records(category_records)
 
         # print the table and exit
         print(categories_df[['groupId', 'categoryId', 'name', 'description', 'threadCount', 'messageCount',]])
+
+        # write the report to a CSV file
+        pretty_date_str = datetime.datetime.now().replace(microsecond=0).isoformat().replace('-', '').replace('T', '_').replace(':', '')
+        categories_df.to_csv(f'./reports/mission_center_categories_{self.username}_{pretty_date_str}.csv')
+
         sys.exit()
 
     def get_group_threads(self):
@@ -97,12 +101,20 @@ class MissionCenter():
                 if group_id not in [int(parts.split(';')[0]) for parts in self.FLAGS.mc_include_categories]:
                     if self.FLAGS.debug:
                         print(f'Skipping groupId: {group_id} due to configuration flags.')
+                    continue
 
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
             result = self._do_json_get_request(url)
             if result.status_code == 200:
-                # Future Work: thread_ids uniquely identify, so the group_id/category_id is not needed
-                self.thread_ids[group_id] = [_['threadId'] for _ in result.json()]
+                if self.FLAGS.mc_include_threads:
+                    # only save the intersection with the configured threadIds
+                    all_threads = [_['threadId'] for _ in result.json()]
+                    include_threads = [int(_) for _ in self.FLAGS.mc_include_threads]
+                    if self.FLAGS.debug:
+                        print(f'Only working on threads {include_threads} out of {all_threads} due to config flags.')
+                    self.thread_ids[group_id] = list(set(all_threads).intersection(set(include_threads)))
+                else:
+                    self.thread_ids[group_id] = all_threads
             else:
                 print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
 
