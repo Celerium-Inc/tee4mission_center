@@ -204,12 +204,12 @@ working on group_id: 15797460
 Use those reports to limit which groups/categoriesthreads to upload
 
 
-Upload only the "Latest IOCs" category:
+Upload only the "Latest IOCs" and "Threat Intel Mailing List" categories:
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359'
+(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359,39155;15034825'
 ```
 
-Upload only the "Peyta Malware" thread:
+Upload only the "Peyta Malware" and "incident X" threads:
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_threads='42341'
+(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_threads='42341,15114525'
 ```
