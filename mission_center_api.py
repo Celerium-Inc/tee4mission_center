@@ -80,7 +80,7 @@ class MissionCenter():
             category_records.extend(response.json())
 
         categories_df = pd.DataFrame.from_records(category_records)
-        
+
         # print the table and exit
         print(categories_df[['groupId', 'categoryId', 'name', 'description', 'threadCount', 'messageCount',]])
         sys.exit()

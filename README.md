@@ -159,3 +159,8 @@ groupId: 16084773
 7    39155       41863          SMB Working Group  Discussion of the latest CTI in our SMB community            9            31
 8    39155    15034825  Threat Intel Mailing List  Mailing LIst to discuss modern Threat Intellig...           62            76
 ```
+
+Upload only the "Latest IOCs" category:
+```
+(venv) $  python main.py --mc_include_categories='39155;15025359' --flagfile=mission_center2splunk.cfg
+```
