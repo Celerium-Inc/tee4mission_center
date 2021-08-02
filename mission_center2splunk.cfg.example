@@ -1,14 +1,21 @@
+--debug=False
+
+# these 3 are required
 --mc_host=https://missioncenter.celeriumd.net
 --mc_username=auser
 --mc_api_key=Aa1...zZ9
 
+# reporting options
+# NOTE: if True, exits after generating report
+--mc_get_threads=False
+
+# upload to misp
 --misp_host=https://example.com:8443/
 --misp_api_key=Aa1...zZ9
 --misp_ssl_verify=True
 
+# upload to splunk
+--splunk_host=https://localhost:8089/
 --splunk_username=auser
 --splunk_password='your-password'
---splunk_host=https://localhost:8089/
 --splunk_ssl_verify=False
-
---debug=False
