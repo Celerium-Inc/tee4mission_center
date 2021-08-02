@@ -63,7 +63,7 @@ class MissionCenter():
         else:
             print(f'Bad status code ({result.status_code}) result received from the API')
 
-    def get_categories(self):
+    def get_categories(self, get_threads=False):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
             self.get_current_user()
 
@@ -86,6 +86,27 @@ class MissionCenter():
         # write the report to a CSV file
         pretty_date_str = datetime.datetime.now().replace(microsecond=0).isoformat().replace('-', '').replace('T', '_').replace(':', '')
         categories_df.to_csv(f'./reports/mission_center_categories_{self.username}_{pretty_date_str}.csv')
+
+        if get_threads:
+            threads = []
+            for group_id in self.group_ids:
+                print(f'working on group_id: {group_id}')
+                result = requests.get(
+                    f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1',
+                    proxies={},
+                    headers=self.headers,
+                    verify=False
+                )
+                threads.extend(result.json())
+
+            threads_df = pd.DataFrame.from_records(threads)
+            threads_df = threads_df.reindex(columns=[
+                'companyId', 'groupId', 'categoryId', 'threadId', 'subject',
+                'rootMessageUser', 'messageCount', 'viewCount', 'lastPostByUser',
+                'lastPostDate', 'priority', 'posts', 'allowedReply', 'rootMessageId']
+            )
+            print(threads_df)
+            threads_df.to_csv(f'./reports/mission_center_threads_{self.username}_{pretty_date_str}.csv')
 
         sys.exit()
 
