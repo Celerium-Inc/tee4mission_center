@@ -47,6 +47,7 @@ def main(argv):
         print('non-flag arguments:', argv)
 
     mc_api = MissionCenter(FLAGS)
+
     if FLAGS.mc_get_categories:
         mc_api.get_categories()
     elif FLAGS.mc_get_threads:

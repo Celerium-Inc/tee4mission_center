@@ -23,17 +23,17 @@ class MissionCenter():
         self.group_ids = []
         self.thread_ids = {}  # keys are group_id, values are list of thread_ids
 
-        # two below are set by refresh_token()
+        # 3 below are (re)set by refresh_token()
+        self.jwt_token_expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=310)
         self.jwt_token = None
         self.headers = None
         self.refresh_token()
 
-
     def refresh_token(self):
         # Create the payload for JWT authorization
+        self.jwt_token_expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=310)
         payload = {
-            'exp': (datetime.datetime.utcnow() +
-                    datetime.timedelta(seconds=310)),
+            'exp': self.jwt_token_expires,
             'sub': self.username
         }
         # Pass in your payload, shared secret, and encryption type to create your JWT
@@ -44,6 +44,8 @@ class MissionCenter():
         }
 
     def _do_json_get_request(self, url):
+        if self.jwt_token_expires < datetime.datetime.utcnow() + datetime.timedelta(seconds=5):
+            self.refresh_token()
         # Request the URL
         return requests.get(
             url,
