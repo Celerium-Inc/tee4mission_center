@@ -139,3 +139,23 @@ https://missioncenter.celeriumd.net ddye <api key redacted>
 groupId: 16084773
 (venv) $
 ```
+
+
+# Get Categories
+
+```
+(venv) $ python main.py --mc_get_categories=True --flagfile=mission_center2splunk.cfg
+```
+
+```
+   groupId  categoryId                       name                                        description  threadCount  messageCount
+0    20143    15385863               Karla TE OFF                                            asdfsdf            1             1
+1    20143    15269554                Karla TE ON                                                tes            8            12
+2    20143    15547858          Karla with CFs on                                   Custom Field Cat            1             3
+3    20143    15713742         SM Test Cat1 TE on                                                               1             1
+4    39155       41749             Admin Category                         Admins private Discussions            1             4
+5    39155    15099024    Bitcoin Threat Payments  This category tracks several different forms o...            2             7
+6    39155    15025359                Latest IOCs                                                              53           150
+7    39155       41863          SMB Working Group  Discussion of the latest CTI in our SMB community            9            31
+8    39155    15034825  Threat Intel Mailing List  Mailing LIst to discuss modern Threat Intellig...           62            76
+```

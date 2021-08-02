@@ -1,8 +1,10 @@
 import datetime
 import os
+import sys
 import urllib3
 
 import jwt  # in PyJWT (not jwt on PyPI)
+import pandas as pd
 import requests
 from var_dump import var_dump
 
@@ -60,6 +62,28 @@ class MissionCenter():
             self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
         else:
             print(f'Bad status code ({result.status_code}) result received from the API')
+
+    def get_categories(self):
+        if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
+            self.get_current_user()
+
+        category_records = []
+        # for each Category(having a GroupID) in each Compartment, get the
+        for group_id in self.group_ids:
+            response = requests.get(
+                f'{self.host}/api/jsonws/security.mbcategory/get-categories?groupId={group_id}&parentCategoryId=0&start=-1&end=-1',
+                proxies={},
+                headers=self.headers,
+                verify=self.FLAGS.mc_ssl_verify
+            )
+            print(response)
+            category_records.extend(response.json())
+
+        categories_df = pd.DataFrame.from_records(category_records)
+        
+        # print the table and exit
+        print(categories_df[['groupId', 'categoryId', 'name', 'description', 'threadCount', 'messageCount',]])
+        sys.exit()
 
     def get_group_threads(self):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:

@@ -21,6 +21,8 @@ flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
 flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
 flags.DEFINE_list('mc_include_categories', None, 'Mission Center API Token')
 
+flags.DEFINE_boolean('mc_get_categories', False, 'Get Mission Center Categories and exit')
+
 flags.DEFINE_string('misp_host', '', 'MISP Host')
 flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
 flags.DEFINE_boolean('misp_ssl_verify', True, 'MISP SSL Verify')
@@ -40,7 +42,10 @@ def main(argv):
         print('non-flag arguments:', argv)
 
     mc_api = MissionCenter(FLAGS)
-    mc_api.get_threat_extraction()
+    if FLAGS.mc_get_categories:
+        mc_api.get_categories()
+    else:
+        mc_api.get_threat_extraction()
 
     if FLAGS.splunk_host:
         for path in glob.glob('./staging/*.json'):
