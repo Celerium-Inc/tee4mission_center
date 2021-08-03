@@ -4,6 +4,7 @@ import os
 import sys
 import urllib3
 
+import jsondiff
 import jwt  # in PyJWT (not jwt on PyPI)
 import pandas as pd
 import requests
@@ -175,30 +176,22 @@ class MissionCenter():
                                 files = []
                                 for afile in [staging_filename, complete_filename]:
                                     with open(afile) as fh:
-                                        files.append(json.dumps(json.load(fh), indent=4).split('\n'))
+                                        pkg = json.load(fh)
+                                        # these keys are unique for every call to TE, so they must be neglected
+                                        # FixMe: handle key/index errors
+                                        pkg.pop('timestamp')
+                                        pkg['indicators'][0].pop('timestamp')
+                                        pkg['observables']['observables'][-1].pop('id')
+                                        pkg['indicators'][0]['observable'].pop('idref')
+                                        files.append(pkg)
 
-                                trip = False
-                                insignificant_diffs = []
-                                for i, aline in enumerate(files[0]):
-                                    if files[1][i] != aline:
-                                        print(i, aline)
-
-                                        test_results = []
-                                        for test in ['"id":', 'timestamp', '"idref":']:
-                                            test_results.append(test in aline)
-                                        if not any(test_results):
-                                            print(f'Significant diff detected: {aline}')
-                                            trip = True
-                                        else:
-                                            print(f'Insignificant diff detected: {aline}')
-                                            insignificant_diffs.append(aline)
-
-                                if not trip:
-                                    print(f'Only insignificant diffs detected: {insignificant_diffs}')
+                                is_diff = jsondiff.diff(files[0], files[1])
+                                if is_diff:
+                                    print(f'Significant diffs detected {is_diff}')
+                                else:
+                                    print(f'Only insignificant diffs detected.  Treating file as duplicate.')
                                     missing_threat_extraction = True
                                     os.remove(staging_filename)
-                                else:
-                                    print('Significant diffs detected. Keeping file in staging.')
                         else:
                             print(f'No threat extraction in thread_id: {thread_id}')
                             missing_threat_extraction = True
