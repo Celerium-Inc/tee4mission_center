@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import sys
 import urllib3
@@ -140,6 +141,7 @@ class MissionCenter():
                     self.thread_ids[group_id] = all_threads
             else:
                 print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
+            print(f'self.thread_ids is now: {self.thread_ids}')
 
     def get_threat_extraction(self):
 
@@ -158,9 +160,7 @@ class MissionCenter():
                         print(f'Working on {group_id},{thread_id},{te_type}')
                     staging_filename = f'./staging/{thread_id}.{te_type}'
                     complete_filename = f'./complete/{thread_id}.{te_type}'
-                    if os.path.exists(complete_filename):
-                        print(f'{complete_filename} exists. Skipping.')
-                        continue
+
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
                     result = self._do_json_get_request(url)
                     if result.status_code == 200:
@@ -168,6 +168,37 @@ class MissionCenter():
                         if threat_extraction_string:
                             with open(staging_filename, 'w') as fh:
                                 fh.write(threat_extraction_string)
+
+                            # If the file matches a previous download in complete, delete it
+                            if os.path.exists(complete_filename):
+                                print(f'{complete_filename} exists. Comparing...')
+                                files = []
+                                for afile in [staging_filename, complete_filename]:
+                                    with open(afile) as fh:
+                                        files.append(json.dumps(json.load(fh), indent=4).split('\n'))
+
+                                trip = False
+                                insignificant_diffs = []
+                                for i, aline in enumerate(files[0]):
+                                    if files[1][i] != aline:
+                                        print(i, aline)
+
+                                        test_results = []
+                                        for test in ['"id":', 'timestamp', '"idref":']:
+                                            test_results.append(test in aline)
+                                        if not any(test_results):
+                                            print(f'Significant diff detected: {aline}')
+                                            trip = True
+                                        else:
+                                            print(f'Insignificant diff detected: {aline}')
+                                            insignificant_diffs.append(aline)
+
+                                if not trip:
+                                    print(f'Only insignificant diffs detected: {insignificant_diffs}')
+                                    missing_threat_extraction = True
+                                    os.remove(staging_filename)
+                                else:
+                                    print('Significant diffs detected. Keeping file in staging.')
                         else:
                             print(f'No threat extraction in thread_id: {thread_id}')
                             missing_threat_extraction = True
