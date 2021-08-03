@@ -25,7 +25,7 @@ $ source ./venv/bin/activate
 (venv) $ pip install -r requirements.txt
 ```
 
-## Verify tequirements are met
+## Verify requirements are met
 ```
 (venv) $ pip show pymisp
 Name: pymisp
@@ -71,8 +71,16 @@ main.py:
     (default: 'false')
   --mc_api_key: Mission Center API Token
     (default: '')
+  --[no]mc_get_categories: Get Mission Center Categories, write a report, and exit
+    (default: 'false')
+  --[no]mc_get_threads: Get Mission Center Threads,write a report, and exit
+    (default: 'false')
   --mc_host: Mission Center Host
     (default: 'https://missioncenter.celeriumd.net')
+  --mc_include_categories: Specify list of `groupId;categoryId,...` to upload
+    (a comma separated list)
+  --mc_include_threads: Specify list of `threadId,...` to upload
+    (a comma separated list)
   --[no]mc_ssl_verify: Mission Center SSL Verify
     (default: 'true')
   --mc_username: Mission Center Username
