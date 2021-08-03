@@ -46,16 +46,22 @@ Required-by:
 This utility uses Abseil's flags (aka gflags):
 https://abseil.io/docs/python/guides/flags
 
-Although you can specify the flags from the command line, it is easiest to put them 
+Although you can specify the flags from the command line interface (CLI), it is easiest to put them 
 into a file and then specify that file with `--flagfile` (see Example below).
 
 An example config file is provided: `mission_center2splunk.cfg.example`
 
+NOTE: When mixing CLI and `--flagfile`, order is important: CLI flags should be *after* the `--flagfile`:
+```
+python main.py --flagfile=mission_center2splunk.cfg --debug=False  # Yes
+
+python main.py --debug=False --flagfile=mission_center2splunk.cfg  # No
+```
 
 # Usage
 
 ```
-(vwnv) $ python main.py --help
+(venv) $ python main.py --help
 
        USAGE: main.py [flags]
 flags:
