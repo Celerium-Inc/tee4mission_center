@@ -1,8 +1,10 @@
 import datetime
+import json
 import os
 import sys
 import urllib3
 
+import jsondiff
 import jwt  # in PyJWT (not jwt on PyPI)
 import pandas as pd
 import requests
@@ -140,6 +142,7 @@ class MissionCenter():
                     self.thread_ids[group_id] = all_threads
             else:
                 print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
+            print(f'self.thread_ids is now: {self.thread_ids}')
 
     def get_threat_extraction(self):
 
@@ -158,9 +161,7 @@ class MissionCenter():
                         print(f'Working on {group_id},{thread_id},{te_type}')
                     staging_filename = f'./staging/{thread_id}.{te_type}'
                     complete_filename = f'./complete/{thread_id}.{te_type}'
-                    if os.path.exists(complete_filename):
-                        print(f'{complete_filename} exists. Skipping.')
-                        continue
+
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
                     result = self._do_json_get_request(url)
                     if result.status_code == 200:
@@ -168,6 +169,29 @@ class MissionCenter():
                         if threat_extraction_string:
                             with open(staging_filename, 'w') as fh:
                                 fh.write(threat_extraction_string)
+
+                            # If the file matches a previous download in complete, delete it
+                            if os.path.exists(complete_filename):
+                                print(f'{complete_filename} exists. Comparing...')
+                                files = []
+                                for afile in [staging_filename, complete_filename]:
+                                    with open(afile) as fh:
+                                        pkg = json.load(fh)
+                                        # these keys are unique for every call to TE, so they must be neglected
+                                        # FixMe: handle key/index errors
+                                        pkg.pop('timestamp')
+                                        pkg['indicators'][0].pop('timestamp')
+                                        pkg['observables']['observables'][-1].pop('id')
+                                        pkg['indicators'][0]['observable'].pop('idref')
+                                        files.append(pkg)
+
+                                is_diff = jsondiff.diff(files[0], files[1])
+                                if is_diff:
+                                    print(f'Significant diffs detected {is_diff}')
+                                else:
+                                    print(f'Only insignificant diffs detected.  Treating file as duplicate.')
+                                    missing_threat_extraction = True
+                                    os.remove(staging_filename)
                         else:
                             print(f'No threat extraction in thread_id: {thread_id}')
                             missing_threat_extraction = True
