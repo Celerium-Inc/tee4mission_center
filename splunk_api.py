@@ -1,9 +1,50 @@
 import json
+import os
 
 import requests
 
 
+def splunk_es_upload_stix(b64str, filepath, FLAGS):
+    """Upload stix file to Splunk Enterprise Security.
+
+    Args:
+        b64str:
+        filepath:
+        FLAGS:
+
+    Returns:
+        Boolean: Success/Failure
+    """
+    url = f'{FLAGS.splunk_host}services/data/threat_intel/upload'
+    _, filename = os.path.split(filepath)
+    data = {
+        'filename': f'__threat_{filename}',
+        'content': b64str,
+        'weight': '1',
+        'overwrite': True,
+        'sinkhole': False,
+    }
+    post_response = requests.post(
+        url,
+        json=data,
+        auth=(FLAGS.splunk_username, FLAGS.splunk_password),
+        verify=FLAGS.splunk_ssl_verify,
+    )
+    if FLAGS.debug:
+        print(post_response.json().get('message'))
+    return post_response.status_code < 300
+
+
 def splunk_upload_stix(data, FLAGS):
+    """Upload stix file to Splunk Enterprise.
+
+    Args:
+        data:
+        FLAGS:
+
+    Returns:
+        Boolean: Success/Failure
+    """
     before_get_response = requests.get(
         f'{FLAGS.splunk_host}servicesNS/nobody/Splunk_Security_Essentials/storage/collections/data/custom_content',
         auth=(FLAGS.splunk_username, FLAGS.splunk_password),
@@ -30,6 +71,4 @@ def splunk_upload_stix(data, FLAGS):
         after_keys = [_['_key'] for _ in after_get_response.json()]
         before_keys = [_['_key'] for _ in before_get_response.json()]
         print(f'New keys added: {set(after_keys) - set(before_keys)}. N keys is now: {len(after_keys)}')
-
-
-
+    return post_response.status_code < 300

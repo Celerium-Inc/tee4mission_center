@@ -110,7 +110,6 @@ class MissionCenter():
             print(threads_df)
             threads_df.to_csv(f'./reports/mission_center_threads_{self.username}_{pretty_date_str}.csv')
 
-        sys.exit()
 
     def get_group_threads(self):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
@@ -129,9 +128,9 @@ class MissionCenter():
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
             result = self._do_json_get_request(url)
             if result.status_code == 200:
+                all_threads = [_['threadId'] for _ in result.json()]
                 if self.FLAGS.mc_include_threads:
                     # only save the intersection with the configured threadIds
-                    all_threads = [_['threadId'] for _ in result.json()]
                     include_threads = [int(_) for _ in self.FLAGS.mc_include_threads]
                     if self.FLAGS.debug:
                         print(f'Only working on threads {include_threads} out of {all_threads} due to config flags.')
@@ -142,14 +141,28 @@ class MissionCenter():
                 print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
 
     def get_threat_extraction(self):
+        """GET json/stix from Mission Center API and save to staging directory.
 
+        Returns:
+            None
+        """
         if not getattr(self, 'thread_ids', None):
             self.get_group_threads()
 
         for group_id in self.thread_ids:
             for thread_id in self.thread_ids[group_id]:
                 missing_threat_extraction = False
-                for te_type in ('json', 'stix'):
+                te_types = []
+                # MISP and Splunk ES use stix files
+                if self.FLAGS.misp_host or (self.FLAGS.splunk_host and self.FLAGS.splunk_es):
+                    te_types.append('stix')
+                # Splunk fall-back (non-ES) is the only one that requires JSON
+                if self.FLAGS.splunk_host and not self.FLAGS.splunk_es:
+                    te_types.append('json')
+                if self.FLAGS.debug:
+                    print(f'Uploading file type(s): {te_types}')
+
+                for te_type in te_types:
                     if missing_threat_extraction:
                         if self.FLAGS.debug:
                             print(f'Skipping the {te_type} download b/c the previous type failed')
