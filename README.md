@@ -230,3 +230,25 @@ Upload only the "Peyta Malware" and "incident X" threads:
 ```
 (venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_threads='42341,15114525'
 ```
+
+# Upload to MISP
+```
+python main.py --flagfile=mission_center2splunk.cfg \
+ --misp_host=https://localhost:8443/
+ --misp_api_key=dMo4DRLN623dFZg56Ttd27utMc2E3XuUc0HlSGsU
+ --misp_ssl_verify=False
+
+
+```
+
+# Upload to Splunk ES
+
+```
+python main.py --flagfile=mission_center2splunk.cfg \
+ --splunk_host=https://es-celerium.splunkcloud.com:8089/ \
+ --splunk_username=DanD \
+ --splunk_password=redacted \
+ --splunk_es=True \
+ --splunk_ssl_verify=False 
+```
+
