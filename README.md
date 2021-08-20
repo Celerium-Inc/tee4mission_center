@@ -106,7 +106,7 @@ Try --helpfull to get a list of all flags.
 
 # Example
 ```
-(venv) $ python main.py --flagfile mission_center2splunk.cfg
+(venv) $ python main.py --flagfile mission_center2splunk.cfg  --debug=True
 https://missioncenter.celeriumd.net ddye <api key redacted>
 <jwt token redacted>
 {'firstName': 'Dan', 'middleName': '', 'lastName': 'Dye', 'screenName': 'ddye', 'emailAddress': 'ddye@celerium.com', 'greeting': 'Welcome Dan Dye!', 'jobTitle': '', 'createDate': '2021-06-18T00:51:51', 'modifiedDate': '2021-07-15T19:03:46', 'timeZoneId': 'UTC', 'languageId': 'en_US', 'companyId': 20116, 'compartments': [{'name': '', 'description': '', 'friendlyURL': '/ddye', 'groupId': 16084773, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Guest</Name></root>', 'description': '', 'friendlyURL': '/guest', 'groupId': 20143, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Threat Intel Center</Name></root>', 'description': '', 'friendlyURL': '/threat-intel-center', 'groupId': 39155, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Billington International</Name></root>', 'description': '', 'friendlyURL': '/auto-isac', 'groupId': 15049013, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Day &amp; Zimmerman</Name></root>', 'description': '', 'friendlyURL': '/day-zimmerman', 'groupId': 15797460, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}], 'entityCacheEnabled': True, 'finderCacheEnabled': True}
@@ -157,9 +157,9 @@ groupId: 16084773
 # Reporting Features
 
 ## Get Categories
-
+Print and write a csv to reports/.  These reports facilitate extraction only from specified Categories (shown below).
 ```
-(venv) $ python main.py --mc_get_categories=True --flagfile=mission_center2splunk.cfg
+(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_get_categories=True
 ```
 
 ```
@@ -175,9 +175,21 @@ groupId: 16084773
 8    39155    15034825  Threat Intel Mailing List  Mailing LIst to discuss modern Threat Intellig...           62            76
 ```
 
+### Extract from only two categories
+
+Specify the groupId with each categoryId like so:
+`'groupId;categoryId,groupId;categoryId'`
+
+Note the single quotes around the value when using CLI flags.
+
+Upload only the "Latest IOCs" and "Threat Intel Mailing List" categories:
+```
+(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359,39155;15034825'
+```
+
 
 ## Get Threads
-
+Print and write a csv to reports/.  These reports facilitate extraction only from specified Threads (shown below).
 ```
 (venv) $ python main.py --flagfile=mission_center2splunk.cfg --debug=False --mc_get_threads=True
 ```
@@ -212,15 +224,6 @@ working on group_id: 15797460
 195      20116  15049013           0  15114525                                 incident X   {'name': 'Chrissy Hines'}             1          4   {'name': 'Chrissy Hines'}  2019-01-16T01:18:25       0.0    []          True       15114524
 
 [196 rows x 14 columns]
-```
-
-
-Use those reports to limit which groups/categoriesthreads to upload
-
-
-Upload only the "Latest IOCs" and "Threat Intel Mailing List" categories:
-```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359,39155;15034825'
 ```
 
 Upload only the "Peyta Malware" and "incident X" threads:
