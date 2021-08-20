@@ -241,7 +241,7 @@ python main.py --flagfile=mission_center2splunk.cfg \
 
 ```
 
-# Upload to Splunk ES
+# Upload to Splunk Enterprise Security (ES)
 
 ```
 python main.py --flagfile=mission_center2splunk.cfg \
@@ -252,3 +252,14 @@ python main.py --flagfile=mission_center2splunk.cfg \
  --splunk_ssl_verify=False 
 ```
 
+# Upload to Splunk Security Essentials
+
+If Splunk ES is not available, the JSON representation of the stix file can be uploaded to Splunk Security Essentials
+```
+python main.py --flagfile=mission_center2splunk.cfg \
+ --splunk_host=https://es-celerium.splunkcloud.com:8089/ \
+ --splunk_username=DanD \
+ --splunk_password=redacted \
+ --splunk_es=False \
+ --splunk_ssl_verify=False 
+```
