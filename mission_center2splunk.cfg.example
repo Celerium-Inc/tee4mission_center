@@ -5,6 +5,9 @@
 --mc_username=auser
 --mc_api_key=Aa1...zZ9
 
+# set to False if self signed cert
+--mc_ssl_verify=True
+
 # reporting options
 # NOTE: if True, exits after generating report
 --mc_get_threads=False
