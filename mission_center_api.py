@@ -160,7 +160,7 @@ class MissionCenter():
                 if self.FLAGS.splunk_host and not self.FLAGS.splunk_es:
                     te_types.append('json')
                 if self.FLAGS.debug:
-                    print(f'Uploading file type(s): {te_types}')
+                    print(f'Downloading file type(s): {te_types}')
 
                 for te_type in te_types:
                     if missing_threat_extraction:

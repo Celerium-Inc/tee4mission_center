@@ -16,7 +16,7 @@ FLAGS = flags.FLAGS
 # Flag names are globally defined!  So in general, we need to be
 # careful to pick names that are unlikely to be used by other libraries.
 # If there is a conflict, we'll get an error at import time.
-flags.DEFINE_string('mc_host', 'https://missioncenter.celeriumd.net', 'Mission Center Host')
+flags.DEFINE_string('mc_host', '', 'Mission Center Host')
 flags.DEFINE_string('mc_username', '', 'Mission Center Username')
 flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
 flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
@@ -50,11 +50,11 @@ def main(argv):
 
     mc_api = MissionCenter(FLAGS)
 
-    if FLAGS.mc_get_categories:
+    if FLAGS.mc_host and FLAGS.mc_get_categories:
         mc_api.get_categories()
-    elif FLAGS.mc_get_threads:
+    elif FLAGS.mc_host and FLAGS.mc_get_threads:
         mc_api.get_categories(get_threads=True)
-    else:
+    elif FLAGS.mc_host:
         mc_api.get_threat_extraction()
 
     if FLAGS.splunk_host:
@@ -85,8 +85,11 @@ def main(argv):
     if FLAGS.misp_host:
         misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
         for path in glob.glob('./staging/*.stix'):
-            misp_upload_stix(misp, path=path, version=1)
-            os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
+            success = misp_upload_stix(misp, path=path, version=1)
+            if success:
+                os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
+            else:
+                os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
 
 
 if __name__ == '__main__':
