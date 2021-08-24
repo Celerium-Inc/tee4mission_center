@@ -25,10 +25,7 @@ def splunk_es_upload_stix(b64str, filepath, FLAGS):
         'sinkhole': False,
     }
     post_response = requests.post(
-        url,
-        json=data,
-        auth=(FLAGS.splunk_username, FLAGS.splunk_password),
-        verify=FLAGS.splunk_ssl_verify,
+        url, json=data, auth=(FLAGS.splunk_username, FLAGS.splunk_password), verify=FLAGS.splunk_ssl_verify,
     )
     if FLAGS.debug:
         print(post_response.json().get('message'))

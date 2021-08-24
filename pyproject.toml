@@ -1,0 +1,14 @@
+[tool.black]
+line-length = 122
+target-version = ['py37']
+skip-string-normalization = true
+exclude = '''
+(
+ /(
+    \.eggs
+  | \.git
+  | \.tox
+  | \.venv
+ )/
+)
+'''

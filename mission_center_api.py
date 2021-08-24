@@ -9,7 +9,7 @@ import requests
 from var_dump import var_dump
 
 
-class MissionCenter():
+class MissionCenter:
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
         self.host = self.FLAGS.mc_host
@@ -32,27 +32,17 @@ class MissionCenter():
     def refresh_token(self):
         # Create the payload for JWT authorization
         self.jwt_token_expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=310)
-        payload = {
-            'exp': self.jwt_token_expires,
-            'sub': self.username
-        }
+        payload = {'exp': self.jwt_token_expires, 'sub': self.username}
         # Pass in your payload, shared secret, and encryption type to create your JWT
         self.jwt_token = jwt.encode(payload, self.token, 'HS256')
         # Create the headers to send in the API request
-        self.headers = {
-            'Authorization': 'Bearer ' + str(self.jwt_token)
-        }
+        self.headers = {'Authorization': 'Bearer ' + str(self.jwt_token)}
 
     def _do_json_get_request(self, url):
         if self.jwt_token_expires < datetime.datetime.utcnow() + datetime.timedelta(seconds=5):
             self.refresh_token()
         # Request the URL
-        return requests.get(
-            url,
-            proxies={},
-            headers=self.headers,
-            verify=self.FLAGS.mc_ssl_verify
-        )
+        return requests.get(url, proxies={}, headers=self.headers, verify=self.FLAGS.mc_ssl_verify)
 
     def get_current_user(self):
         """Set group_id list to identify each of the Compartments."""
@@ -76,7 +66,7 @@ class MissionCenter():
                 f'{self.host}/api/jsonws/security.mbcategory/get-categories?groupId={group_id}&parentCategoryId=0&start=-1&end=-1',
                 proxies={},
                 headers=self.headers,
-                verify=self.FLAGS.mc_ssl_verify
+                verify=self.FLAGS.mc_ssl_verify,
             )
             category_records.extend(response.json())
 
@@ -86,7 +76,9 @@ class MissionCenter():
         print(categories_df[['groupId', 'categoryId', 'name', 'description', 'threadCount', 'messageCount',]])
 
         # write the report to a CSV file
-        pretty_date_str = datetime.datetime.now().replace(microsecond=0).isoformat().replace('-', '').replace('T', '_').replace(':', '')
+        pretty_date_str = (
+            datetime.datetime.now().replace(microsecond=0).isoformat().replace('-', '').replace('T', '_').replace(':', '')
+        )
         categories_df.to_csv(f'./reports/mission_center_categories_{self.username}_{pretty_date_str}.csv')
 
         if get_threads:
@@ -97,19 +89,31 @@ class MissionCenter():
                     f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1',
                     proxies={},
                     headers=self.headers,
-                    verify=False
+                    verify=False,
                 )
                 threads.extend(result.json())
 
             threads_df = pd.DataFrame.from_records(threads)
-            threads_df = threads_df.reindex(columns=[
-                'companyId', 'groupId', 'categoryId', 'threadId', 'subject',
-                'rootMessageUser', 'messageCount', 'viewCount', 'lastPostByUser',
-                'lastPostDate', 'priority', 'posts', 'allowedReply', 'rootMessageId']
+            threads_df = threads_df.reindex(
+                columns=[
+                    'companyId',
+                    'groupId',
+                    'categoryId',
+                    'threadId',
+                    'subject',
+                    'rootMessageUser',
+                    'messageCount',
+                    'viewCount',
+                    'lastPostByUser',
+                    'lastPostDate',
+                    'priority',
+                    'posts',
+                    'allowedReply',
+                    'rootMessageId',
+                ]
             )
             print(threads_df)
             threads_df.to_csv(f'./reports/mission_center_threads_{self.username}_{pretty_date_str}.csv')
-
 
     def get_group_threads(self):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
@@ -138,7 +142,9 @@ class MissionCenter():
                 else:
                     self.thread_ids[group_id] = all_threads
             else:
-                print(f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.')
+                print(
+                    f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.'
+                )
 
     def get_threat_extraction(self):
         """GET json/stix from Mission Center API and save to staging directory.
@@ -185,5 +191,7 @@ class MissionCenter():
                             print(f'No threat extraction in thread_id: {thread_id}')
                             missing_threat_extraction = True
                     else:
-                        print(f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}')
+                        print(
+                            f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}'
+                        )
                         missing_threat_extraction = True
