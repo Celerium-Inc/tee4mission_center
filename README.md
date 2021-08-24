@@ -240,7 +240,7 @@ Upload only the "Peyta Malware" and "incident X" threads:
 ```
 python tee4mission_center.py --flagfile=tee4mission_center.cfg \
  --misp_host=https://localhost:8443/
- --misp_api_key=dMo4DRLN623dFZg56Ttd27utMc2E3XuUc0HlSGsU
+ --misp_api_key=dMo...redacted...sU
  --misp_ssl_verify=False
 
 
