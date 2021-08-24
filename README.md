@@ -1,19 +1,22 @@
 
 # Mission Center Integrations Script
 
-Mission Center has STIX XML files associated with threads.  This script enumerates all of the threads accessible to the user (who’s API Keys are used) and then downloads the XML (and JSON version) for each thread to a local directory (./staging).
+Mission Center has "Threat Extraction" STIX XML/JSON files associated with threads.  This "Threat Extraction Engine" enumerates all of the threads accessible to the user (who’s API Keys are used) and then downloads the XML (and/or JSON representataion) for each thread to a local directory (./staging).
+
+If only a subset of the threads' STIX is desired, the list of Thread IDs and/or Category IDs may be specified.  The reporting features may be used to find those IDs. 
 
 ## MISP
 
-After downloading the XML from Mission Center, when the MISP config settings are present, the script submits STIX1 to the MISP Instance.
+If the MISP config settings are present, the script submits the downloaded STIX to the MISP Instance.  The files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
 
-## Splunk Enterprise Security (Future Work)
+## Splunk Enterprise Security
 
-After downloading the XML from Mission Center, when the Splunk config settings are present, the script submits STIX1 to the Splunk ES Instance’s /data/threat_intel/upload API.
+If the Splunk config settings are present and `--splunk_es` (Enterprise Security) is True (the default), the script submits the downloaded STIX to the Splunk ES Instance’s /data/threat_intel/upload API.  The files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
+
 
 ## Splunk Splunk Security Essentials
 
-After downloading the JSON from Mission Center, when the Splunk config settings are present, the script submits the JSON to the Splunk Instance’s Splunk_Security_Essentials/storage/collections/data/custom_content API.
+If the Splunk config settings are present and `--splunk_es` (Enterprise Security) is False, the script submits the downloaded JSON to the Splunk Instance’s `Splunk_Security_Essentials/storage/collections/data/custom_content` API.  The JSON files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
 
 
 # Requirements
@@ -76,7 +79,7 @@ main.py:
   --[no]mc_get_threads: Get Mission Center Threads,write a report, and exit
     (default: 'false')
   --mc_host: Mission Center Host
-    (default: 'https://missioncenter.celeriumd.net')
+    (default: '')
   --mc_include_categories: Specify list of `groupId;categoryId,...` to upload
     (a comma separated list)
   --mc_include_threads: Specify list of `threadId,...` to upload
@@ -90,6 +93,8 @@ main.py:
   --misp_host: MISP Host
     (default: '')
   --[no]misp_ssl_verify: MISP SSL Verify
+    (default: 'true')
+  --[no]splunk_es: Splunk Enterprise Security
     (default: 'true')
   --splunk_host: Splunk Host
     (default: '')
