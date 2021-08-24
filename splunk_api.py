@@ -8,9 +8,9 @@ def splunk_es_upload_stix(b64str, filepath, FLAGS):
     """Upload stix file to Splunk Enterprise Security.
 
     Args:
-        b64str:
-        filepath:
-        FLAGS:
+        b64str: base64 encoded stix XML
+        filepath: path and file name
+        FLAGS: abseil flags
 
     Returns:
         Boolean: Success/Failure
@@ -18,7 +18,7 @@ def splunk_es_upload_stix(b64str, filepath, FLAGS):
     url = f'{FLAGS.splunk_host}services/data/threat_intel/upload'
     _, filename = os.path.split(filepath)
     data = {
-        'filename': f'__threat_{filename}',
+        'filename': f'__threat_{filename}',  # the prefix is an undocumented requirement for Splunk ES
         'content': b64str,
         'weight': '1',
         'overwrite': True,
@@ -36,11 +36,11 @@ def splunk_es_upload_stix(b64str, filepath, FLAGS):
 
 
 def splunk_upload_stix(data, FLAGS):
-    """Upload stix file to Splunk Enterprise.
+    """Upload stix file to Splunk Security Essentials.
 
     Args:
-        data:
-        FLAGS:
+        data: JSON representation of the STIX object
+        FLAGS: abseil flags
 
     Returns:
         Boolean: Success/Failure
