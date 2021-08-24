@@ -56,20 +56,20 @@ An example config file is provided: `mission_center2splunk.cfg.example`
 
 NOTE: When mixing CLI and `--flagfile`, order is important: CLI flags should be *after* the `--flagfile`:
 ```
-python main.py --flagfile=mission_center2splunk.cfg --debug=False  # Yes
+python tee4mission_center.py --flagfile=mission_center2splunk.cfg --debug=False  # Yes
 
-python main.py --debug=False --flagfile=mission_center2splunk.cfg  # No
+python tee4mission_center.py --debug=False --flagfile=mission_center2splunk.cfg  # No
 ```
 
 # Usage
 
 ```
-(venv) $ python main.py --help
+(venv) $ python tee4mission_center.py --help
 
-       USAGE: main.py [flags]
+       USAGE: tee4mission_center.py [flags]
 flags:
 
-main.py:
+tee4mission_center.py:
   --[no]debug: Produces debugging output
     (default: 'false')
   --mc_api_key: Mission Center API Token
@@ -111,7 +111,7 @@ Try --helpfull to get a list of all flags.
 
 # Example
 ```
-(venv) $ python main.py --flagfile mission_center2splunk.cfg  --debug=True
+(venv) $ python tee4mission_center.py --flagfile mission_center2splunk.cfg  --debug=True
 https://missioncenter.celeriumd.net ddye <api key redacted>
 <jwt token redacted>
 {'firstName': 'Dan', 'middleName': '', 'lastName': 'Dye', 'screenName': 'ddye', 'emailAddress': 'ddye@celerium.com', 'greeting': 'Welcome Dan Dye!', 'jobTitle': '', 'createDate': '2021-06-18T00:51:51', 'modifiedDate': '2021-07-15T19:03:46', 'timeZoneId': 'UTC', 'languageId': 'en_US', 'companyId': 20116, 'compartments': [{'name': '', 'description': '', 'friendlyURL': '/ddye', 'groupId': 16084773, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Guest</Name></root>', 'description': '', 'friendlyURL': '/guest', 'groupId': 20143, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Threat Intel Center</Name></root>', 'description': '', 'friendlyURL': '/threat-intel-center', 'groupId': 39155, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Billington International</Name></root>', 'description': '', 'friendlyURL': '/auto-isac', 'groupId': 15049013, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}, {'name': '<?xml version=\'1.0\' encoding=\'UTF-8\'?><root available-locales="en_US" default-locale="en_US"><Name language-id="en_US">Day &amp; Zimmerman</Name></root>', 'description': '', 'friendlyURL': '/day-zimmerman', 'groupId': 15797460, 'parentGroupId': 0, 'entityCacheEnabled': True, 'finderCacheEnabled': True}], 'entityCacheEnabled': True, 'finderCacheEnabled': True}
@@ -164,7 +164,7 @@ groupId: 16084773
 ## Get Categories
 Print and write a csv to reports/.  These reports facilitate extraction only from specified Categories (shown below).
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_get_categories=True
+(venv) $ python tee4mission_center.py --flagfile=mission_center2splunk.cfg --mc_get_categories=True
 ```
 
 ```
@@ -189,14 +189,14 @@ Note the single quotes around the value when using CLI flags.
 
 Upload only the "Latest IOCs" and "Threat Intel Mailing List" categories:
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359,39155;15034825'
+(venv) $ python tee4mission_center.py --flagfile=mission_center2splunk.cfg --mc_include_categories='39155;15025359,39155;15034825'
 ```
 
 
 ## Get Threads
 Print and write a csv to reports/.  These reports facilitate extraction only from specified Threads (shown below).
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --debug=False --mc_get_threads=True
+(venv) $ python tee4mission_center.py --flagfile=mission_center2splunk.cfg --debug=False --mc_get_threads=True
 ```
 
 ```
@@ -233,12 +233,12 @@ working on group_id: 15797460
 
 Upload only the "Peyta Malware" and "incident X" threads:
 ```
-(venv) $ python main.py --flagfile=mission_center2splunk.cfg --mc_include_threads='42341,15114525'
+(venv) $ python tee4mission_center.py --flagfile=mission_center2splunk.cfg --mc_include_threads='42341,15114525'
 ```
 
 # Upload to MISP
 ```
-python main.py --flagfile=mission_center2splunk.cfg \
+python tee4mission_center.py --flagfile=mission_center2splunk.cfg \
  --misp_host=https://localhost:8443/
  --misp_api_key=dMo4DRLN623dFZg56Ttd27utMc2E3XuUc0HlSGsU
  --misp_ssl_verify=False
@@ -249,7 +249,7 @@ python main.py --flagfile=mission_center2splunk.cfg \
 # Upload to Splunk Enterprise Security (ES)
 
 ```
-python main.py --flagfile=mission_center2splunk.cfg \
+python tee4mission_center.py --flagfile=mission_center2splunk.cfg \
  --splunk_host=https://es-celerium.splunkcloud.com:8089/ \
  --splunk_username=DanD \
  --splunk_password=redacted \
@@ -261,7 +261,7 @@ python main.py --flagfile=mission_center2splunk.cfg \
 
 If Splunk ES is not available, the JSON representation of the stix file can be uploaded to Splunk Security Essentials
 ```
-python main.py --flagfile=mission_center2splunk.cfg \
+python tee4mission_center.py --flagfile=mission_center2splunk.cfg \
  --splunk_host=https://es-celerium.splunkcloud.com:8089/ \
  --splunk_username=DanD \
  --splunk_password=redacted \
