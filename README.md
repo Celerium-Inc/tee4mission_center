@@ -1,7 +1,7 @@
 
-# Mission Center Integrations Script
+# Threat Extraction Engine for Mission Center
 
-Mission Center has "Threat Extraction" STIX XML/JSON files associated with threads.  This "Threat Extraction Engine" enumerates all of the threads accessible to the user (who’s API Keys are used) and then downloads the XML (and/or JSON representataion) for each thread to a local directory (./staging).
+Mission Center has "Threat Extraction" into STIX XML/JSON files associated with threads.  This "Threat Extraction Engine" enumerates all of the threads accessible to the user (who’s API Keys are used) and then downloads the XML (and/or JSON representataion) for each thread to a local directory (./staging).
 
 If only a subset of the threads' STIX is desired, the list of Thread IDs and/or Category IDs may be specified.  The reporting features may be used to find those IDs. 
 
