@@ -1,3 +1,4 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tee4mission_center&metric=alert_status&token=1f89b08748c5afd74a4f4706ad0c0a7d84d8eed7)](https://sonarcloud.io/dashboard?id=tee4mission_center)
 
 # Threat Extraction Engine for Mission Center
 
