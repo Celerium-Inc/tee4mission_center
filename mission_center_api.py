@@ -86,7 +86,7 @@ class MissionCenter:
             for group_id in self.group_ids:
                 print(f'working on group_id: {group_id}')
                 result = requests.get(
-                    f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1',
+                    f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&start=-1&end=-1',
                     proxies={},
                     headers=self.headers,
                     verify=False,
@@ -129,7 +129,7 @@ class MissionCenter:
                         print(f'Skipping groupId: {group_id} due to configuration flags.')
                     continue
 
-            url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&subscribed=false&includeAnonymous=false&start=-1&end=-1'
+            url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&start=-1&end=-1'
             result = self._do_json_get_request(url)
             if result.status_code == 200:
                 all_threads = [_['threadId'] for _ in result.json()]
