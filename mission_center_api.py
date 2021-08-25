@@ -89,7 +89,7 @@ class MissionCenter:
                     f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&start=-1&end=-1',
                     proxies={},
                     headers=self.headers,
-                    verify=False,
+                    verify=self.FLAGS.mc_ssl_verify,
                 )
                 threads.extend(result.json())
 
