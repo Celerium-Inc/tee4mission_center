@@ -14,7 +14,7 @@ If the MISP config settings are present, the script submits the downloaded STIX 
 If the Splunk config settings are present and `--splunk_es` (Enterprise Security) is True (the default), the script submits the downloaded STIX to the Splunk ES Instance’s /data/threat_intel/upload API.  The files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
 
 
-## Splunk Splunk Security Essentials
+## Splunk Security Essentials
 
 If the Splunk config settings are present and `--splunk_es` (Enterprise Security) is False, the script submits the downloaded JSON to the Splunk Instance’s `Splunk_Security_Essentials/storage/collections/data/custom_content` API.  The JSON files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
 
