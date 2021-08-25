@@ -23,7 +23,7 @@ flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
 
 # get a report of groups/categories
 flags.DEFINE_boolean('mc_get_categories', False, 'Get Mission Center Categories, write a report, and exit')
-flags.DEFINE_boolean('mc_get_threads', False, 'Get Mission Center Threads,write a report, and exit')
+flags.DEFINE_boolean('mc_get_threads', False, 'Get Mission Center Threads, write a report, and exit')
 
 # process subset of groups/categories/threads
 flags.DEFINE_list('mc_include_categories', None, 'Specify list of `groupId;categoryId,...` to upload')

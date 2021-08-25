@@ -76,7 +76,7 @@ tee4mission_center.py:
     (default: '')
   --[no]mc_get_categories: Get Mission Center Categories, write a report, and exit
     (default: 'false')
-  --[no]mc_get_threads: Get Mission Center Threads,write a report, and exit
+  --[no]mc_get_threads: Get Mission Center Threads, write a report, and exit
     (default: 'false')
   --mc_host: Mission Center Host
     (default: '')
