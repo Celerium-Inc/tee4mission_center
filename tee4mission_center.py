@@ -9,7 +9,7 @@ from pymisp import PyMISP
 
 from mission_center_api import MissionCenter
 from misp_api import misp_upload_stix
-from splunk_api import splunk_upload_stix, splunk_es_upload_stix
+from splunk_api import splunk_upload_stix, splunk_es_upload_stix, splunk_es_lookup
 
 FLAGS = flags.FLAGS
 
@@ -50,20 +50,22 @@ def main(argv):
 
     mc_api = MissionCenter(FLAGS)
 
-    if FLAGS.mc_host and FLAGS.mc_get_categories:
-        mc_api.get_categories()
-    elif FLAGS.mc_host and FLAGS.mc_get_threads:
-        mc_api.get_categories(get_threads=True)
-    elif FLAGS.mc_host:
-        mc_api.get_threat_extraction()
+    threads_df = mc_api.get_categories(get_threads=True)
+
+    mc_api.get_threat_extraction()
 
     if FLAGS.splunk_host:
         if FLAGS.splunk_es:
-            for path in glob.glob('./staging/*.stix'):
+            for path in glob.glob('./staging/*.json'):
                 with open(path) as fh:
-                    stix = fh.read()
-                    b64str = base64.b64encode(stix.encode('utf-8')).decode('utf-8')
-                success = splunk_es_upload_stix(b64str, path, FLAGS=FLAGS)
+                    try:
+                        data = json.loads(fh.read())
+                    except:
+                        print('problem reading json')
+                        os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
+                        continue
+
+                success = splunk_es_lookup(data, path, threads_df, FLAGS=FLAGS)
                 if success:
                     os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
                 else:

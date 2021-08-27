@@ -28,47 +28,67 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
     configurable_page_name = 'cti-discussions'
     mc_url = f'{FLAGS.mc_host}/group/{compartment_friendly_url}/{configurable_page_name}/-/message_boards/message/{root_message_id}'
 
-    api_url = f'{FLAGS.mc_host}/api/jsonws/security.mbthread/get-thread?groupId={{groupId}}&categoryId={{categoryId}}&threadId={{threadId}}&'
+    try:
+        types = [_['object']['properties']['xsi:type'] for _ in data['observables']['observables'] if _.get('object')]
+    except:
+        if data.get('indicators') and not data.get('observables'):
+            print('Skipping Indicator with no observables...')
+            return False
+        import pdb; pdb.set_trace()
 
-    #description = f"{subject};"
+    # ToDo: sort the observables by type and post the ones that use the same lookup_name together
+    for observable in data['observables']['observables']:
+        items = []
+        if observable.get('object'):  # False for Observable Compositions
+            xsi_type = observable['object']['properties']['xsi:type']
+            if xsi_type == 'AddressObjectType':
+                value = observable['object']['properties']['address_value']
+                short_type = 'ip'
+                lookup_name = 'ip_intel'
+            elif xsi_type == 'FileObjectType':
+                value = observable['object']['properties']['hashes'][0]['simple_hash_value']  # FixMe handle multiple hashes
+                short_type = 'file_hash'
+                lookup_name = 'file_intel'
+            elif xsi_type == 'DomainNameObjectType':
+                value = observable['object']['properties']['value']
+                short_type = 'domain'
+                #lookup_name = 'http_intel'  # "Atleast one important field of collection is required."
+                lookup_name = 'ip_intel'
+            elif xsi_type == 'URIObjectType':
+                value = observable['object']['properties']['value']
+                short_type = 'url'
+                lookup_name = 'http_intel'
+            else:
+                print('new type')
+                import pdb; pdb.set_trace()
 
-    threat_intel_collection = 'ip_intel'
-    url = f'{FLAGS.splunk_host}services/data/threat_intel/item/{threat_intel_collection}'
+        items.append(f'{{"{short_type}": "{value}","description":"{description}","threat_key":"{mc_url}"}}',)
 
-    #_, filename = os.path.split(filepath)
-    # embedded_domain, src_user, subject, file_hash, file_name, embedded_ip
+        joined_items = ','.join(items)
 
-    types = [_['object']['properties']['xsi:type'] for _ in data['observables']['observables'] if _.get('object')]
-    
+        url = f'{FLAGS.splunk_host}services/data/threat_intel/item/{lookup_name}'
 
-    address_value = data['observables']['observables'][6]['object']['properties']['address_value']
-    domain_name0 = data['observables']['observables'][2]['object']['properties']['value']
-    domain_name1 = data['observables']['observables'][3]['object']['properties']['value']
-    items = [
-        f'{{"ip": "{address_value}","description":"{description}","threat_key":"{mc_url}"}}',
-        f'{{"domain":"{domain_name0}","description":"{description}","threat_key":"{mc_url}"}}',
-        f'{{"domain":"{domain_name1}","description":"{description}","threat_key":"{mc_url}"}}',
-    ]
-    items = ','.join(items)
+        encoded = urllib.parse.quote_plus(f'[{joined_items}]')
+        payload = f'item={encoded}'
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        post_response = requests.request("POST",
+                                    url,
+                                    auth=(FLAGS.splunk_username, FLAGS.splunk_password),
+                                    headers=headers,
+                                    data=payload,
+                                    verify = FLAGS.splunk_ssl_verify,
+                                    )
 
-    encoded = urllib.parse.quote_plus(f'[{items}]')
-    payload = f'item={encoded}'
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    post_response = requests.request("POST",
-                                url,
-                                auth=(FLAGS.splunk_username, FLAGS.splunk_password),
-                                headers=headers,
-                                data=payload,
-                                verify = FLAGS.splunk_ssl_verify,
-                                )
+        print(post_response.__dict__)
+        if post_response.status_code >= 300:
+            print('debugging...')
+            import pdb; pdb.set_trace()
 
-    print(post_response.__dict__)
-    import pdb; pdb.set_trace()
-
-    if FLAGS.debug:
-        print(post_response.json().get('message'))
+        if FLAGS.debug:
+            print(post_response.json().get('message'))
 
     return post_response.status_code < 300
+
 
 def splunk_es_upload_stix(b64str, filepath, FLAGS):
     """Upload stix file to Splunk Enterprise Security.
