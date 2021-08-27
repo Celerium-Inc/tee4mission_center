@@ -114,6 +114,7 @@ class MissionCenter:
             )
             print(threads_df)
             threads_df.to_csv(f'./reports/mission_center_threads_{self.username}_{pretty_date_str}.csv')
+            return threads_df
 
     def get_group_threads(self):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
@@ -161,7 +162,7 @@ class MissionCenter:
                 te_types = []
                 # MISP and Splunk ES use stix files
                 if self.FLAGS.misp_host or (self.FLAGS.splunk_host and self.FLAGS.splunk_es):
-                    te_types.append('stix')
+                    te_types.append('json')
                 # Splunk fall-back (non-ES) is the only one that requires JSON
                 if self.FLAGS.splunk_host and not self.FLAGS.splunk_es:
                     te_types.append('json')
