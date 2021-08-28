@@ -42,9 +42,14 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
         if observable.get('object'):  # False for Observable Compositions
             xsi_type = observable['object']['properties']['xsi:type']
             if xsi_type == 'AddressObjectType':
-                value = observable['object']['properties']['address_value']
-                short_type = 'ip'
-                lookup_name = 'ip_intel'
+                if observable['object']['properties'].get('category') == 'e-mail':
+                    value = observable['object']['properties']['address_value']
+                    short_type = 'src_user'
+                    lookup_name = 'email_intel'
+                else:
+                    value = observable['object']['properties']['address_value']
+                    short_type = 'ip'
+                    lookup_name = 'ip_intel'
             elif xsi_type == 'FileObjectType':
                 value = observable['object']['properties']['hashes'][0]['simple_hash_value']  # FixMe handle multiple hashes
                 short_type = 'file_hash'
@@ -62,9 +67,9 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
                 print('new type')
                 import pdb; pdb.set_trace()
 
-        items.append(f'{{"{short_type}": "{value}","description":"{description}","threat_key":"{mc_url}"}}',)
+        items.append({short_type: value, "description": description, "threat_key": mc_url})
 
-        joined_items = ','.join(items)
+        joined_items = ','.join([json.dumps(item) for item in items])
 
         url = f'{FLAGS.splunk_host}services/data/threat_intel/item/{lookup_name}'
 
@@ -82,6 +87,9 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
         print(post_response.__dict__)
         if post_response.status_code >= 300:
             print('debugging...')
+            """
+            ['{"ip": "threatintel@htcc.secport.com","description": 
+            """
             import pdb; pdb.set_trace()
 
         if FLAGS.debug:
