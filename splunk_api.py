@@ -34,7 +34,10 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
         if data.get('indicators') and not data.get('observables'):
             print('Skipping Indicator with no observables...')
             return False
-        import pdb; pdb.set_trace()
+        else:
+            print('debug observable getter...')
+            import pdb; pdb.set_trace()
+            return False
 
     # ToDo: sort the observables by type and post the ones that use the same lookup_name together
     for observable in data['observables']['observables']:
