@@ -32,6 +32,10 @@ flags.DEFINE_boolean('mc_get_threads', False, 'Get Mission Center Threads, write
 flags.DEFINE_list('mc_include_categories', None, 'Specify list of `groupId;categoryId,...` to upload')
 flags.DEFINE_list('mc_include_threads', None, 'Specify list of `threadId,...` to upload')
 
+flags.DEFINE_boolean('mc_extract_only', False, 'Extract to staging/ and skip uploading.')
+flags.DEFINE_boolean('mc_upload_only', False, 'Upload from staging/ without checking for new extractions.')
+
+
 flags.DEFINE_string('misp_host', '', 'MISP Host')
 flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
 flags.DEFINE_boolean('misp_ssl_verify', True, 'MISP SSL Verify')
@@ -55,9 +59,10 @@ def main(argv):
 
     threads_df = mc_api.get_categories(get_threads=True)
 
-    # mc_api.get_threat_extraction()
+    if not FLAGS.mc_upload_only:
+        mc_api.get_threat_extraction()
 
-    if FLAGS.splunk_host:
+    if FLAGS.splunk_host and not FLAGS.mc_extract_only:
         for path in glob.glob('./staging/*.json'):
             with open(path) as fh:
                 try:
@@ -75,7 +80,7 @@ def main(argv):
             else:
                 os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
 
-    if FLAGS.misp_host:
+    if FLAGS.misp_host and not FLAGS.mc_extract_only:
         misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
         for path in glob.glob('./staging/*.stix'):
             success = misp_upload_stix(misp, path=path, version=1)
