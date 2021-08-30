@@ -24,32 +24,15 @@ def splunk_upload_kv(data, filepath, threads_df, FLAGS):
     row = threads_df.loc[threads_df['threadId'] == thread_id]
     root_message_id = row['rootMessageId'].values[0]
     subject = row['subject'].values[0]
-
+    group_id = row['groupId'].values[0]
+    category_id = row['categoryId'].values[0]
     description = f'{subject};{base64.b64encode(bytes(row.to_json(), "utf-8")).decode("utf-8")}'
-
-    # FixMe: hard-coded for dev with test instance
-    # this is not available from the MC API.  Not sure what to do.
-    compartment_friendly_url = 'threat-intel-center'
-
-    # FixMe: hard-coded for dev with test instance
-    # this info is in the DataFrame
-    configurable_page_name = 'cti-discussions'
-
-    mc_url = f'{FLAGS.mc_host}/group/{compartment_friendly_url}/{configurable_page_name}/-/message_boards/message/{root_message_id}'
-
-    try:
-        # ToDo: more robost type getter. This one fails on Indicators and Observable Compositions.
-        types = [_['object']['properties']['xsi:type'] for _ in data['observables']['observables'] if _.get('object')]
-    except:
-        if data.get('indicators') and not data.get('observables'):
-            log(FLAGS, 'Skipping Indicator with no observables...')
-            return False
-        else:
-            log(FLAGS, 'debug observable getter...')
-            import pdb; pdb.set_trace()
-            return False
+    # ToDo: find a way to create th "friendly" versions of these URLs:
+    # mc_url = f'{FLAGS.mc_host}/group/{compartment_friendly_url}/{configurable_page_name}/-/message_boards/message/{root_message_id}'
+    mc_url = f'{FLAGS.mc_host}/group/{group_id}/{category_id}/-/message_boards/message/{root_message_id}'
 
     # ToDo: sort the observables by type and post the ones that use the same lookup_name together
+    # ToDo: when should IP and Domain be combined into a single row?
     for observable in data['observables']['observables']:
         items = []
         if observable.get('object'):  # False for Observable Compositions
@@ -77,7 +60,7 @@ def splunk_upload_kv(data, filepath, threads_df, FLAGS):
                 short_type = 'url'
                 lookup_name = 'http_intel'
             else:
-                log(FLAGS, 'new type')
+                log(FLAGS, 'new type encountered.  Debugging...')
                 import pdb; pdb.set_trace()
 
         items.append({short_type: value, "description": description, "threat_key": mc_url})
@@ -99,7 +82,7 @@ def splunk_upload_kv(data, filepath, threads_df, FLAGS):
 
         log(FLAGS, post_response.__dict__)
         if post_response.status_code >= 300:
-            log(FLAGS, 'debugging...')
+            log(FLAGS, 'Failed POST.  Debugging...')
             """
             ['{"ip": "threatintel@htcc.secport.com","description": 
             """
