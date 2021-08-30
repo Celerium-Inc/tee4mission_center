@@ -9,7 +9,9 @@ from pymisp import PyMISP
 
 from mission_center_api import MissionCenter
 from misp_api import misp_upload_stix
-from splunk_api import splunk_upload_stix, splunk_es_upload_stix, splunk_es_lookup
+from splunk_api import splunk_upload_stix, splunk_upload_kv
+
+from common import log
 
 FLAGS = flags.FLAGS
 
@@ -46,44 +48,32 @@ flags.DEFINE_boolean('debug', False, 'Produces debugging output')
 def main(argv):
     if False in (FLAGS.splunk_ssl_verify, FLAGS.misp_ssl_verify, FLAGS.mc_ssl_verify):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    if FLAGS.debug:
-        print('non-flag arguments:', argv)
+
+    log(FLAGS, f'non-flag arguments: {argv}')
 
     mc_api = MissionCenter(FLAGS)
 
     threads_df = mc_api.get_categories(get_threads=True)
 
-    mc_api.get_threat_extraction()
+    # mc_api.get_threat_extraction()
 
     if FLAGS.splunk_host:
-        if FLAGS.splunk_es:
-            for path in glob.glob('./staging/*.json'):
-                with open(path) as fh:
-                    try:
-                        data = json.loads(fh.read())
-                    except:
-                        print('problem reading json')
-                        os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
-                        continue
-
-                success = splunk_es_lookup(data, path, threads_df, FLAGS=FLAGS)
-                if success:
-                    os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
-                else:
+        for path in glob.glob('./staging/*.json'):
+            with open(path) as fh:
+                try:
+                    data = json.loads(fh.read())
+                except:
+                    log(FLAGS, 'problem reading json')
                     os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
-        else:
-            for path in glob.glob('./staging/*.json'):
-                with open(path) as fh:
-                    try:
-                        data = json.load(fh)
-                    except json.decoder.JSONDecodeError:
-                        print(f'Invalid JSON in the file: {path}')
-                        continue
-                    success = splunk_upload_stix(data=data, FLAGS=FLAGS)
-                    if success:
-                        os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
-                    else:
-                        os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
+                    continue
+            if FLAGS.splunk_es:
+                success = splunk_upload_kv(data, path, threads_df, FLAGS=FLAGS)
+            else:
+                success = splunk_upload_stix(data=data, FLAGS=FLAGS)
+            if success:
+                os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
+            else:
+                os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
 
     if FLAGS.misp_host:
         misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)

@@ -5,8 +5,11 @@ import urllib
 
 import requests
 
-def splunk_es_lookup(data, filepath, threads_df, FLAGS):
-    """Upload observbles to Splunk Enterprise Security Lookups.
+from common import log
+
+
+def splunk_upload_kv(data, filepath, threads_df, FLAGS):
+    """Upload KeyValue Lookups to Splunk Enterprise Security.
 
     Args:
         b64str: base64 encoded stix XML
@@ -24,18 +27,25 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
 
     description = f'{subject};{base64.b64encode(bytes(row.to_json(), "utf-8")).decode("utf-8")}'
 
+    # FixMe: hard-coded for dev with test instance
+    # this is not available from the MC API.  Not sure what to do.
     compartment_friendly_url = 'threat-intel-center'
+
+    # FixMe: hard-coded for dev with test instance
+    # this info is in the DataFrame
     configurable_page_name = 'cti-discussions'
+
     mc_url = f'{FLAGS.mc_host}/group/{compartment_friendly_url}/{configurable_page_name}/-/message_boards/message/{root_message_id}'
 
     try:
+        # ToDo: more robost type getter. This one fails on Indicators and Observable Compositions.
         types = [_['object']['properties']['xsi:type'] for _ in data['observables']['observables'] if _.get('object')]
     except:
         if data.get('indicators') and not data.get('observables'):
-            print('Skipping Indicator with no observables...')
+            log(FLAGS, 'Skipping Indicator with no observables...')
             return False
         else:
-            print('debug observable getter...')
+            log(FLAGS, 'debug observable getter...')
             import pdb; pdb.set_trace()
             return False
 
@@ -67,7 +77,7 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
                 short_type = 'url'
                 lookup_name = 'http_intel'
             else:
-                print('new type')
+                log(FLAGS, 'new type')
                 import pdb; pdb.set_trace()
 
         items.append({short_type: value, "description": description, "threat_key": mc_url})
@@ -87,22 +97,21 @@ def splunk_es_lookup(data, filepath, threads_df, FLAGS):
                                     verify = FLAGS.splunk_ssl_verify,
                                     )
 
-        print(post_response.__dict__)
+        log(FLAGS, post_response.__dict__)
         if post_response.status_code >= 300:
-            print('debugging...')
+            log(FLAGS, 'debugging...')
             """
             ['{"ip": "threatintel@htcc.secport.com","description": 
             """
             import pdb; pdb.set_trace()
 
-        if FLAGS.debug:
-            print(post_response.json().get('message'))
+        log(FLAGS, post_response.json().get('message'))
 
     return post_response.status_code < 300
 
 
 def splunk_es_upload_stix(b64str, filepath, FLAGS):
-    """Upload stix file to Splunk Enterprise Security.
+    """Upload stix file to Splunk Enterprise Security (deprecated).
 
     Args:
         b64str: base64 encoded stix XML
@@ -126,8 +135,7 @@ def splunk_es_upload_stix(b64str, filepath, FLAGS):
     post_response = requests.post(
         url, json=data, auth=(FLAGS.splunk_username, FLAGS.splunk_password), verify=FLAGS.splunk_ssl_verify,
     )
-    if FLAGS.debug:
-        print(post_response.json().get('message'))
+    log(FLAGS, post_response.json().get('message'))
     return post_response.status_code < 300
 
 
@@ -156,7 +164,7 @@ def splunk_upload_stix(data, FLAGS):
     )
     # expect http 201
     new_keys = post_response.json()
-    print(f'Created key: {new_keys["_key"]}')
+    log(FLAGS, f'Created key: {new_keys["_key"]}')
 
     if FLAGS.debug:
         after_get_response = requests.get(
@@ -166,5 +174,6 @@ def splunk_upload_stix(data, FLAGS):
         )
         after_keys = [_['_key'] for _ in after_get_response.json()]
         before_keys = [_['_key'] for _ in before_get_response.json()]
-        print(f'New keys added: {set(after_keys) - set(before_keys)}. N keys is now: {len(after_keys)}')
+        log(FLAGS, f'New keys added: {set(after_keys) - set(before_keys)}. N keys is now: {len(after_keys)}')
+
     return post_response.status_code < 300
