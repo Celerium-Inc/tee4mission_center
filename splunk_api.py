@@ -33,7 +33,8 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
 
     # ToDo: sort the observables by type and post the ones that use the same lookup_name together
     # ToDo: when should IP and Domain be combined into a single row?
-    for observable in data['observables']['observables']:
+    post_responses = []
+    for observable in data.get('observables', {}).get('observables', []):
         items = []
         if observable.get('object'):  # False for Observable Compositions
             xsi_type = observable['object']['properties']['xsi:type']
@@ -53,15 +54,15 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
             elif xsi_type == 'DomainNameObjectType':
                 value = observable['object']['properties']['value']
                 short_type = 'domain'
-                #lookup_name = 'http_intel'  # "Atleast one important field of collection is required."
+                # lookup_name = 'http_intel'  # "Atleast one important field of collection is required."
                 lookup_name = 'ip_intel'
             elif xsi_type == 'URIObjectType':
                 value = observable['object']['properties']['value']
                 short_type = 'url'
                 lookup_name = 'http_intel'
             else:
-                log(flags, 'new type encountered.  Debugging...')
-                import pdb; pdb.set_trace()
+                log(flags, 'new type encountered: {xsi_type}')
+                # import pdb; pdb.set_trace()
 
         items.append({short_type: value, "description": description, "threat_key": mc_url})
 
@@ -80,17 +81,14 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
                                     verify = flags.splunk_ssl_verify,
                                     )
 
-        log(flags, post_response.__dict__)
         if post_response.status_code >= 300:
-            log(flags, 'Failed POST.  Debugging...')
-            """
-            ['{"ip": "threatintel@htcc.secport.com","description": 
-            """
-            import pdb; pdb.set_trace()
+            log(flags, f'Failed POST: {post_response.__dict__}')
 
         log(flags, post_response.json().get('message'))
 
-    return post_response.status_code < 300
+        post_responses.append(post_response.status_code < 300)
+
+    return all(post_responses)
 
 
 def splunk_es_upload_stix(b64str, filepath, flags):

@@ -73,9 +73,9 @@ def main(argv):
                     continue
 
             if FLAGS.splunk_es:
-                success = splunk_upload_kv(data, path, threads_df, FLAGS=FLAGS)
+                success = splunk_upload_kv(data, path, threads_df, flags=FLAGS)
             else:
-                success = splunk_upload_stix(data=data, FLAGS=FLAGS)
+                success = splunk_upload_stix(data=data, flags=FLAGS)
             if success:
                 os.rename(path, path.replace('staging', 'complete'))  # mv from staging to complete
             else:
