@@ -1,6 +1,5 @@
 import datetime
 import os
-import sys
 import urllib3
 
 import jwt  # in PyJWT (not jwt on PyPI)
