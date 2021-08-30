@@ -8,6 +8,8 @@ import pandas as pd
 import requests
 from var_dump import var_dump
 
+from common import log
+
 
 class MissionCenter:
     def __init__(self, FLAGS):
@@ -53,7 +55,7 @@ class MissionCenter:
             # One and only one groupId for each Compartment
             self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
         else:
-            print(f'Bad status code ({result.status_code}) result received from the API')
+            log(FLAGS, f'Bad status code ({result.status_code}) result received from the API')
 
     def get_categories(self, get_threads=False):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
@@ -112,7 +114,7 @@ class MissionCenter:
                     'rootMessageId',
                 ]
             )
-            print(threads_df)
+            print(threads_df)  # Note: prints head,ellipsis,tail
             threads_df.to_csv(f'./reports/mission_center_threads_{self.username}_{pretty_date_str}.csv')
             return threads_df
 
@@ -120,16 +122,12 @@ class MissionCenter:
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
             self.get_current_user()
 
-        for group_id in self.group_ids:
-            if self.FLAGS.debug:
-                print(f'Working on group_id: {group_id}...')
+        if self.FLAGS.mc_include_categories:
+            group_ids_to_do = set(self.group_ids).intersection(set([int(_.split(';')[0]) for _ in self.FLAGS.mc_include_categories]))
+        else:
+            group_ids_to_do = self.group_ids
 
-            if self.FLAGS.mc_include_categories:
-                if group_id not in [int(parts.split(';')[0]) for parts in self.FLAGS.mc_include_categories]:
-                    if self.FLAGS.debug:
-                        print(f'Skipping groupId: {group_id} due to configuration flags.')
-                    continue
-
+        for group_id in group_ids_to_do:
             url = f'{self.host}/api/jsonws/security.mbthread/get-group-threads?groupId={group_id}&start=-1&end=-1'
             result = self._do_json_get_request(url)
             if result.status_code == 200:
@@ -137,15 +135,12 @@ class MissionCenter:
                 if self.FLAGS.mc_include_threads:
                     # only save the intersection with the configured threadIds
                     include_threads = [int(_) for _ in self.FLAGS.mc_include_threads]
-                    if self.FLAGS.debug:
-                        print(f'Only working on threads {include_threads} out of {all_threads} due to config flags.')
+                    log(self.FLAGS, f'Only working on threads {include_threads} out of {all_threads} due to config flags.')
                     self.thread_ids[group_id] = list(set(all_threads).intersection(set(include_threads)))
                 else:
                     self.thread_ids[group_id] = all_threads
             else:
-                print(
-                    f'Get Group Threads: Bad status code ({result.status_code}) received from the API for group_id: {group_id}.'
-                )
+                log(self.FLAGS, f'Get Group Threads: Bad status code ({result.status_code}) for group_id: {group_id}.')
 
     def get_threat_extraction(self):
         """GET json/stix from Mission Center API and save to staging directory.
@@ -161,28 +156,24 @@ class MissionCenter:
                 missing_threat_extraction = False
                 for te_type in self.FLAGS.mc_te_types:
                     if missing_threat_extraction:
-                        if self.FLAGS.debug:
-                            print(f'Skipping the {te_type} download b/c the previous type failed')
+                        log(self.FLAGS, f'Skipping the {te_type} download b/c the previous type failed')
                         continue
-                    if self.FLAGS.debug:
-                        print(f'Working on {group_id},{thread_id},{te_type}')
+
+                    log(self.FLAGS, f'Working on {group_id},{thread_id},{te_type}')
+
                     staging_filename = f'./staging/{thread_id}.{te_type}'
                     complete_filename = f'./complete/{thread_id}.{te_type}'
-                    if os.path.exists(complete_filename):
-                        print(f'{complete_filename} exists. Skipping.')
+
+                    if os.path.exists(complete_filename) or os.path.exists(staging_filename):
+                        log(self.FLAGS, f'{complete_filename} (or staging) exists. Skipping.')
                         continue
+
                     url = f'{self.host}/api/jsonws/security.mbthread/get-thread?&threadId={thread_id}&includePosts=false&includeTE=true&teType={te_type}&postsDesc=true&xssScrape=false'
                     result = self._do_json_get_request(url)
                     if result.status_code == 200:
                         threat_extraction_string = result.json().get('threatExtraction', '')
-                        if threat_extraction_string:
-                            with open(staging_filename, 'w') as fh:
-                                fh.write(threat_extraction_string)
-                        else:
-                            print(f'No threat extraction in thread_id: {thread_id}')
-                            missing_threat_extraction = True
+                        with open(staging_filename, 'w') as fh:
+                            fh.write(threat_extraction_string)
                     else:
-                        print(
-                            f'Bad status code ({result.status_code} received from the API in get_threat_extraction for thread_id: {thread_id}'
-                        )
+                        log(self.FLAGS, f'Bad status code ({result.status_code} for thread_id: {thread_id}')
                         missing_threat_extraction = True
