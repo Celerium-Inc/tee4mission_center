@@ -48,7 +48,9 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
                     short_type = 'ip'
                     lookup_name = 'ip_intel'
             elif xsi_type == 'FileObjectType':
-                value = observable['object']['properties']['hashes'][0]['simple_hash_value']  # FixMe handle multiple hashes
+                value = observable['object']['properties']['hashes'][0][
+                    'simple_hash_value'
+                ]  # FixMe handle multiple hashes
                 short_type = 'file_hash'
                 lookup_name = 'file_intel'
             elif xsi_type == 'DomainNameObjectType':
@@ -73,13 +75,14 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
         encoded = urllib.parse.quote_plus(f'[{joined_items}]')
         payload = f'item={encoded}'
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        post_response = requests.request("POST",
-                                    url,
-                                    auth=(flags.splunk_username, flags.splunk_password),
-                                    headers=headers,
-                                    data=payload,
-                                    verify = flags.splunk_ssl_verify,
-                                    )
+        post_response = requests.request(
+            "POST",
+            url,
+            auth=(flags.splunk_username, flags.splunk_password),
+            headers=headers,
+            data=payload,
+            verify=flags.splunk_ssl_verify,
+        )
 
         if post_response.status_code >= 300:
             log(flags, f'Failed POST: {post_response.__dict__}')

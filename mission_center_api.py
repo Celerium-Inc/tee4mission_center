@@ -122,7 +122,9 @@ class MissionCenter:
             self.get_current_user()
 
         if self.flags.mc_include_categories:
-            group_ids_to_do = set(self.group_ids).intersection(set([int(_.split(';')[0]) for _ in self.flags.mc_include_categories]))
+            group_ids_to_do = set(self.group_ids).intersection(
+                set([int(_.split(';')[0]) for _ in self.flags.mc_include_categories])
+            )
         else:
             group_ids_to_do = self.group_ids
 
@@ -134,7 +136,9 @@ class MissionCenter:
                 if self.flags.mc_include_threads:
                     # only save the intersection with the configured threadIds
                     include_threads = [int(_) for _ in self.flags.mc_include_threads]
-                    log(self.flags, f'Only working on threads {include_threads} out of {all_threads} due to config flags.')
+                    log(
+                        self.flags, f'Only working on threads {include_threads} out of {all_threads} due to config flags.'
+                    )
                     self.thread_ids[group_id] = list(set(all_threads).intersection(set(include_threads)))
                 else:
                     self.thread_ids[group_id] = all_threads
