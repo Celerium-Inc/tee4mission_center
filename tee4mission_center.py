@@ -19,6 +19,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('mc_host', '', 'Mission Center Host')
 flags.DEFINE_string('mc_username', '', 'Mission Center Username')
 flags.DEFINE_string('mc_api_key', '', 'Mission Center API Token')
+flags.DEFINE_list('mc_te_types', ['stix', 'json'], 'Mission Center Threat Extraction file types')
 flags.DEFINE_boolean('mc_ssl_verify', True, 'Mission Center SSL Verify')
 
 # get a report of groups/categories

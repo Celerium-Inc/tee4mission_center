@@ -159,17 +159,7 @@ class MissionCenter:
         for group_id in self.thread_ids:
             for thread_id in self.thread_ids[group_id]:
                 missing_threat_extraction = False
-                te_types = []
-                # MISP and Splunk ES use stix files
-                if self.FLAGS.misp_host or (self.FLAGS.splunk_host and self.FLAGS.splunk_es):
-                    te_types.append('json')
-                # Splunk fall-back (non-ES) is the only one that requires JSON
-                if self.FLAGS.splunk_host and not self.FLAGS.splunk_es:
-                    te_types.append('json')
-                if self.FLAGS.debug:
-                    print(f'Downloading file type(s): {te_types}')
-
-                for te_type in te_types:
+                for te_type in self.FLAGS.mc_te_types:
                     if missing_threat_extraction:
                         if self.FLAGS.debug:
                             print(f'Skipping the {te_type} download b/c the previous type failed')
