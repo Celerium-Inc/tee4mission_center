@@ -67,10 +67,11 @@ def main(argv):
             with open(path) as fh:
                 try:
                     data = json.loads(fh.read())
-                except:
-                    log(FLAGS, 'problem reading json')
+                except ValueError as e:
+                    log(FLAGS, f'problem reading json file: {path}; error: {e}')
                     os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
                     continue
+
             if FLAGS.splunk_es:
                 success = splunk_upload_kv(data, path, threads_df, FLAGS=FLAGS)
             else:
