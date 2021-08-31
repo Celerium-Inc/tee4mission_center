@@ -82,8 +82,6 @@ tee4mission_center.py:
     (default: 'false')
   --mc_api_key: Mission Center API Token
     (default: '')
-  --[no]mc_extract_only: Extract to staging/ and skip uploading.
-    (default: 'false')
   --[no]mc_get_categories: Get Mission Center Categories, write a report, and exit
     (default: 'false')
   --[no]mc_get_threads: Get Mission Center Threads, write a report, and exit
@@ -94,13 +92,15 @@ tee4mission_center.py:
     (a comma separated list)
   --mc_include_threads: Specify list of `threadId,...` to upload
     (a comma separated list)
+  --[no]mc_only_extract: Extract to staging/ and skip uploading.
+    (default: 'false')
+  --[no]mc_only_upload: Upload from staging/ without checking for new extractions.
+    (default: 'false')
   --[no]mc_ssl_verify: Mission Center SSL Verify
     (default: 'true')
   --mc_te_types: Mission Center Threat Extraction file types
     (default: 'stix,json')
     (a comma separated list)
-  --[no]mc_upload_only: Upload from staging/ without checking for new extractions.
-    (default: 'false')
   --mc_username: Mission Center Username
     (default: '')
   --misp_api_key: MISP API Token
@@ -120,7 +120,7 @@ tee4mission_center.py:
   --splunk_username: Splunk Username
     (default: '')
 
-Try --helpfull to get a list of all flags.```
+Try --helpfull to get a list of all flags.
 ```
 
 # Example
@@ -256,8 +256,6 @@ python tee4mission_center.py --flagfile=tee4mission_center.cfg \
  --misp_host=https://localhost:8443/
  --misp_api_key=dMo...redacted...sU
  --misp_ssl_verify=False
-
-
 ```
 
 # Upload to Splunk Enterprise Security (ES)
