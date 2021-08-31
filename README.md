@@ -269,3 +269,13 @@ python tee4mission_center.py --flagfile=tee4mission_center.cfg \
  --splunk_es=False \
  --splunk_ssl_verify=False 
 ```
+
+# Screencasts
+
+## Part 1
+[![Alt text](https://img.youtube.com/vi/g3CzOFR0Ab0/0.jpg)](https://www.youtube.com/watch?v=g3CzOFR0Ab0)
+
+## Part 2
+[![Alt text](https://img.youtube.com/vi/npg2QqSJDo8/0.jpg)](https://www.youtube.com/watch?v=npg2QqSJDo8)
+
+
