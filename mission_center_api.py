@@ -49,12 +49,11 @@ class MissionCenter:
         """Set group_id list to identify each of the Compartments."""
         result = self._do_json_get_request(f'{self.host}/api/jsonws/security.currentuser/get-current-user')
         if result.status_code == 200:
-            if self.flags.debug:
-                var_dump(result)
+            log(self.flags, var_dump(result))
             # One and only one groupId for each Compartment
             self.group_ids = [_['groupId'] for _ in result.json().get('compartments', {})]
         else:
-            log(FLAGS, f'Bad status code ({result.status_code}) result received from the API')
+            log(self.flags, f'Bad status code ({result.status_code}) result received from the API')
 
     def get_categories(self, get_threads=False):
         if getattr(self, 'group_ids', None) is None or len(self.group_ids) == 0:
