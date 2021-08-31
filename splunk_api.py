@@ -63,8 +63,9 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
                 short_type = 'url'
                 lookup_name = 'http_intel'
             else:
-                log(flags, 'new type encountered: {xsi_type}')
+                log(flags, 'new type encountered: {xsi_type}. Skipping.')
                 # import pdb; pdb.set_trace()
+                continue
 
         items.append({short_type: value, "description": description, "threat_key": mc_url})
 
