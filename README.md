@@ -6,6 +6,14 @@ Mission Center has "Threat Extraction" into STIX XML/JSON files associated with 
 
 If only a subset of the threads' STIX is desired, the list of Thread IDs and/or Category IDs may be specified.  The reporting features may be used to find those IDs. 
 
+# Screencasts
+
+## Part 1
+[![Alt text](https://img.youtube.com/vi/g3CzOFR0Ab0/0.jpg)](https://www.youtube.com/watch?v=g3CzOFR0Ab0)
+
+## Part 2
+[![Alt text](https://img.youtube.com/vi/npg2QqSJDo8/0.jpg)](https://www.youtube.com/watch?v=npg2QqSJDo8)
+
 ## MISP
 
 If the MISP config settings are present, the script submits the downloaded STIX to the MISP Instance.  The files successfully uploaded are moved from the `staging/` directory, to the `complete/` directory.
@@ -275,13 +283,3 @@ python tee4mission_center.py --flagfile=tee4mission_center.cfg \
  --splunk_es=False \
  --splunk_ssl_verify=False 
 ```
-
-# Screencasts
-
-## Part 1
-[![Alt text](https://img.youtube.com/vi/g3CzOFR0Ab0/0.jpg)](https://www.youtube.com/watch?v=g3CzOFR0Ab0)
-
-## Part 2
-[![Alt text](https://img.youtube.com/vi/npg2QqSJDo8/0.jpg)](https://www.youtube.com/watch?v=npg2QqSJDo8)
-
-
