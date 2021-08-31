@@ -32,9 +32,8 @@ flags.DEFINE_boolean('mc_get_threads', False, 'Get Mission Center Threads, write
 flags.DEFINE_list('mc_include_categories', None, 'Specify list of `groupId;categoryId,...` to upload')
 flags.DEFINE_list('mc_include_threads', None, 'Specify list of `threadId,...` to upload')
 
-flags.DEFINE_boolean('mc_extract_only', False, 'Extract to staging/ and skip uploading.')
-flags.DEFINE_boolean('mc_upload_only', False, 'Upload from staging/ without checking for new extractions.')
-
+flags.DEFINE_boolean('mc_only_extract', False, 'Extract to staging/ and skip uploading.')
+flags.DEFINE_boolean('mc_only_upload', False, 'Upload from staging/ without checking for new extractions.')
 
 flags.DEFINE_string('misp_host', '', 'MISP Host')
 flags.DEFINE_string('misp_api_key', '', 'MISP API Token')
