@@ -27,7 +27,7 @@ def splunk_upload_kv(data, filepath, threads_df, flags):
     group_id = row['groupId'].values[0]
     category_id = row['categoryId'].values[0]
     description = f'{subject};{base64.b64encode(bytes(row.to_json(), "utf-8")).decode("utf-8")}'
-    # ToDo: find a way to create th "friendly" versions of these URLs:
+    # ToDo: find a way to create the "friendly" versions of these URLs:
     # mc_url = f'{flags.mc_host}/group/{compartment_friendly_url}/{configurable_page_name}/-/message_boards/message/{root_message_id}'
     mc_url = f'{flags.mc_host}/group/{group_id}/{category_id}/-/message_boards/message/{root_message_id}'
 
