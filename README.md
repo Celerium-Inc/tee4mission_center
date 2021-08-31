@@ -6,13 +6,12 @@ Mission Center has "Threat Extraction" into STIX XML/JSON files associated with 
 
 If only a subset of the threads' STIX is desired, the list of Thread IDs and/or Category IDs may be specified.  The reporting features may be used to find those IDs. 
 
-# Screencasts
+## Screencasts
 
-### Part 1: Download from Mission Center and upload to MISP
-[![Alt text](https://img.youtube.com/vi/g3CzOFR0Ab0/0.jpg)](https://www.youtube.com/watch?v=g3CzOFR0Ab0)
 
-### Part 2: Upload to Splunk Enterprise Security
-[![Alt text](https://img.youtube.com/vi/npg2QqSJDo8/0.jpg)](https://www.youtube.com/watch?v=npg2QqSJDo8)
+| Part 1: Download from Mission Center and upload to MISP | Part 2: Upload to Splunk Enterprise Security |
+| ----------- | ----------- |
+| [![Alt text](https://img.youtube.com/vi/g3CzOFR0Ab0/0.jpg)](https://www.youtube.com/watch?v=g3CzOFR0Ab0)      | [![Alt text](https://img.youtube.com/vi/npg2QqSJDo8/0.jpg)](https://www.youtube.com/watch?v=npg2QqSJDo8)  |
 
 ## MISP
 
