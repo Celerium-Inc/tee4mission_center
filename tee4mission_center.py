@@ -58,10 +58,10 @@ def main(argv):
 
     threads_df = mc_api.get_categories(get_threads=True)
 
-    if not FLAGS.mc_upload_only:
+    if not FLAGS.mc_only_upload:
         mc_api.get_threat_extraction()
 
-    if FLAGS.splunk_host and not FLAGS.mc_extract_only:
+    if FLAGS.splunk_host and not FLAGS.mc_only_extract:
         for path in glob.glob('./staging/*.json'):
             with open(path) as fh:
                 try:
@@ -80,7 +80,7 @@ def main(argv):
             else:
                 os.rename(path, path.replace('staging', 'failed'))  # mv from staging to failed
 
-    if FLAGS.misp_host and not FLAGS.mc_extract_only:
+    if FLAGS.misp_host and not FLAGS.mc_only_extract:
         misp = PyMISP(FLAGS.misp_host, FLAGS.misp_api_key, FLAGS.misp_ssl_verify)
         for path in glob.glob('./staging/*.stix'):
             success = misp_upload_stix(misp, path=path, version=1)
